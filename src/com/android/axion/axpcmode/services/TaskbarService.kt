@@ -1,0 +1,292 @@
+/*
+ * Copyright (C) 2025-2026 AxionOS Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.axion.axpcmode.services
+
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.os.Binder
+import android.os.IBinder
+import android.os.UserHandle
+import android.provider.Settings
+import android.util.Log
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
+import com.android.axion.axpcmode.ui.*
+import com.android.axion.axpcmode.ui.components.ContextMenuState
+import com.android.axion.axpcmode.ui.windows.TaskbarIconRegistry
+import com.android.axion.axpcmode.utils.AppInfo
+import com.android.axion.axpcmode.utils.TaskbarConstants
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
+@AndroidEntryPoint(Service::class)
+class TaskbarService : Hilt_TaskbarService() {
+    companion object {
+        private const val TAG = "TaskbarService"
+
+        fun start(context: Context) {
+            val intent =
+                Intent(context, TaskbarService::class.java).apply {
+                    action = TaskbarConstants.ACTION_START
+                }
+            context.startForegroundService(intent)
+        }
+
+        fun stop(context: Context) {
+            val intent =
+                Intent(context, TaskbarService::class.java).apply {
+                    action = TaskbarConstants.ACTION_STOP
+                }
+            context.startService(intent)
+        }
+    }
+
+    private lateinit var windowManager: WindowManager
+    private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    private val _isTaskbarVisible = MutableStateFlow(true)
+    val isTaskbarVisible: StateFlow<Boolean> = _isTaskbarVisible.asStateFlow()
+
+    private var autoHideJob: Job? = null
+
+    private val contextMenuState = ContextMenuState()
+    private val taskbarIconRegistry = TaskbarIconRegistry()
+
+    private lateinit var panelOverlayManager: PanelOverlayManager
+    @Inject lateinit var vm: PcModeLauncherViewModel
+    @Inject lateinit var qsRepository: QuickSettingsRepository
+    @Inject lateinit var qsViewModel: QuickSettingsViewModel
+    @Inject lateinit var mediaRepository: MediaRepository
+    private lateinit var notificationListener: AxNotificationListener
+    private lateinit var inputMethodManager: InputMethodManager
+
+    @Inject lateinit var notificationHelper: TaskbarNotificationHelper
+    private lateinit var windowHelper: TaskbarWindowManager
+    private lateinit var interactor: TaskbarInteractor
+    @Inject lateinit var appRepository: TaskbarAppRepository
+    private lateinit var panelController: TaskbarPanelController
+
+    private val binder = TaskbarBinder()
+
+    inner class TaskbarBinder : Binder() {
+        fun getService(): TaskbarService = this@TaskbarService
+
+        fun updatePinnedApps(apps: List<AppInfo>) {
+            vm.updatePinnedApps(apps)
+        }
+
+        fun showTaskbar() {
+            revealTaskbar()
+        }
+
+        fun hideTaskbar() {
+            hideTaskbarNow()
+        }
+
+        fun resetAutoHideTimer() {
+            this@TaskbarService.resetAutoHideTimer()
+        }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+        panelOverlayManager = PanelOverlayManager(this)
+
+        windowHelper = TaskbarWindowManager(this)
+        interactor = TaskbarInteractor(this, vm, this, inputMethodManager)
+
+        registerNotificationListener()
+
+        appRepository.init()
+
+        panelController =
+            TaskbarPanelController(
+                context = this,
+                vm = vm,
+                scope = serviceScope,
+                panelOverlayManager = panelOverlayManager,
+                qsViewModel = qsViewModel,
+                mediaRepository = mediaRepository,
+                contextMenuState = contextMenuState,
+            )
+        panelController.init()
+
+        serviceScope.launch { appRepository.topTaskPackage.collect { resetAutoHideTimer() } }
+
+        notificationHelper.createNotificationChannel()
+        Log.d(TAG, "TaskbarService created")
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            TaskbarConstants.ACTION_START -> {
+                startForeground(
+                    TaskbarConstants.NOTIFICATION_ID,
+                    notificationHelper.createForegroundNotification(),
+                )
+                showTaskbarOverlay()
+                Log.d(TAG, "TaskbarService started")
+            }
+            TaskbarConstants.ACTION_STOP -> {
+                runCatching {
+                    cleanup()
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    stopSelf()
+                }
+                Log.d(TAG, "TaskbarService stopped")
+            }
+            TaskbarConstants.ACTION_SHOW -> revealTaskbar()
+            TaskbarConstants.ACTION_HIDE -> hideTaskbarNow()
+            TaskbarConstants.ACTION_TOGGLE_START_MENU -> vm.toggleStartMenu()
+            TaskbarConstants.ACTION_TOGGLE_QUICK_SETTINGS -> vm.toggleQuickSettingsPanel()
+            TaskbarConstants.ACTION_TOGGLE_NOTIFICATIONS -> vm.toggleNotificationPanel()
+        }
+        return START_STICKY
+    }
+
+    override fun onBind(intent: Intent?): IBinder = binder
+
+    override fun onDestroy() {
+        cleanup()
+        serviceScope.cancel()
+        super.onDestroy()
+        Log.d(TAG, "TaskbarService destroyed")
+    }
+
+    private fun showTaskbarOverlay() {
+        if (windowHelper.getTaskbarView() != null) return
+
+        val factory =
+            TaskbarViewFactory(
+                context = this,
+                windowHelper = windowHelper,
+                contextMenuState = contextMenuState,
+                taskbarIconRegistry = taskbarIconRegistry,
+                interactor = interactor,
+            )
+
+        val taskbarView =
+            factory.createTaskbar(
+                isVisibleFlow = _isTaskbarVisible.asStateFlow(),
+                pinnedAppsFlow = vm.pinnedApps,
+                runningAppsFlow = vm.runningApps,
+            )
+        val hintView = factory.createHint(isVisibleFlow = _isTaskbarVisible.asStateFlow())
+
+        windowHelper.addTaskbarView(taskbarView)
+        windowHelper.addHintView(hintView)
+        resetAutoHideTimer()
+    }
+
+    internal fun revealTaskbar() {
+        _isTaskbarVisible.value = true
+        resetAutoHideTimer()
+    }
+
+    internal fun hideTaskbarImmediately() {
+        autoHideJob?.cancel()
+        _isTaskbarVisible.value = false
+    }
+
+    internal fun hideTaskbarNow() {
+        autoHideJob?.cancel()
+        if (vm.isAnyPanelShowing()) {
+            resetAutoHideTimer()
+        } else {
+            _isTaskbarVisible.value = false
+        }
+    }
+
+    fun resetAutoHideTimer() {
+        val topPkg = appRepository.topTaskPackage.value
+
+        val isDesktop = topPkg == "com.android.axion.axpcmode"
+
+        if (isDesktop) {
+            autoHideJob?.cancel()
+            _isTaskbarVisible.value = true
+        } else {
+            autoHideJob?.cancel()
+            val timeoutMs = Settings.Secure.getInt(
+                applicationContext.contentResolver,
+                "ax_pc_mode_taskbar_timeout",
+                TaskbarConstants.AUTO_HIDE_DELAY_MS.toInt()
+            ).toLong()
+            autoHideJob =
+                serviceScope.launch {
+                    delay(timeoutMs)
+                    if (vm.isAnyPanelShowing()) {
+                        resetAutoHideTimer()
+                    } else {
+                        _isTaskbarVisible.value = false
+                    }
+                }
+        }
+    }
+
+    private fun registerNotificationListener() {
+        notificationListener = AxNotificationListener()
+        notificationListener.scope = serviceScope
+        notificationListener.mediaRepository = mediaRepository
+        notificationListener.registerAsSystemService(
+            applicationContext,
+            AxNotificationListener.componentName,
+            UserHandle.USER_ALL,
+        )
+        Log.d(TAG, "Notification listener registered")
+    }
+
+    private fun unregisterNotificationListener() {
+        try {
+            notificationListener.unregisterAsSystemService()
+            Log.d(TAG, "Notification listener unregistered")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to unregister notification listener", e)
+        }
+    }
+
+    private fun cleanup() {
+        autoHideJob?.cancel()
+
+        if (::appRepository.isInitialized) {
+            appRepository.cleanup()
+        }
+
+        if (::panelOverlayManager.isInitialized) {
+            panelOverlayManager.cleanup()
+        }
+
+        if (::qsRepository.isInitialized) {
+            qsRepository.onDestroy()
+        }
+        if (::mediaRepository.isInitialized) {
+            mediaRepository.onDestroy()
+        }
+
+        if (::notificationListener.isInitialized) {
+            unregisterNotificationListener()
+        }
+
+        windowHelper.removeTaskbarView()
+        windowHelper.removeHintView()
+    }
+}
