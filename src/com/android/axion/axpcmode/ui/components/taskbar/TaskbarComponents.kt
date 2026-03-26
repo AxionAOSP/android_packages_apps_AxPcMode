@@ -27,7 +27,14 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun TaskbarDivider() {
-    Box(modifier = Modifier.width(1.dp).height(24.dp).background(Color.Transparent))
+    Spacer(modifier = Modifier.width(2.dp))
+    Box(
+        modifier = Modifier
+            .width(1.dp)
+            .height(24.dp)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
+    )
+    Spacer(modifier = Modifier.width(2.dp))
 }
 
 @Composable

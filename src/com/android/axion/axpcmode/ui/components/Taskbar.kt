@@ -29,6 +29,9 @@ import androidx.compose.ui.unit.dp
 import com.android.axion.axpcmode.ui.components.taskbar.*
 import com.android.axion.axpcmode.utils.AppInfo
 
+private const val MAX_VISIBLE_TASKS = 4
+private val MAX_TASKS_WIDTH = (MAX_VISIBLE_TASKS * 48 + (MAX_VISIBLE_TASKS - 1) * 4).dp
+
 @Composable
 fun Taskbar(
     pinnedApps: List<AppInfo>,
@@ -56,15 +59,27 @@ fun Taskbar(
         color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.95f),
         shadowElevation = 8.dp,
         shape = RoundedCornerShape(12.dp),
-        modifier = modifier.fillMaxWidth().height(56.dp).padding(horizontal = 8.dp, vertical = 4.dp),
+        modifier = modifier.fillMaxWidth().height(56.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+            modifier = Modifier.fillMaxSize()
+                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
+                .padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            TaskbarNavigation(
+                onBackClick = onBackClick,
+                onHomeClick = onHomeClick,
+                onRecentsClick = onRecentsClick,
+            )
+
+            TaskbarDivider()
+
             Row(
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.Center,
             ) {
                 TaskbarIconButton(onClick = onStartClick, hasBackground = true) {
                     AxionLogo(modifier = Modifier.size(22.dp))
@@ -72,19 +87,12 @@ fun Taskbar(
 
                 TaskbarDivider()
 
-                TaskbarNavigation(
-                    onBackClick = onBackClick,
-                    onHomeClick = onHomeClick,
-                    onRecentsClick = onRecentsClick,
-                )
-
-                TaskbarDivider()
-
                 Row(
                     modifier =
-                        Modifier.widthIn(max = 220.dp).horizontalScroll(rememberScrollState()),
+                        Modifier.widthIn(max = MAX_TASKS_WIDTH)
+                            .horizontalScroll(rememberScrollState()),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     pinnedApps.forEach { app ->
                         val runningTask = runningApps.find { it.packageName == app.packageName }
@@ -99,32 +107,22 @@ fun Taskbar(
                             onClick = { onAppClick(appToUse) },
                         )
                     }
-                }
-            }
 
-            if (unpinnedRunningApps.isNotEmpty()) {
-                TaskbarDivider()
-
-                Row(
-                    modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    unpinnedRunningApps.forEach { app ->
-                        TaskbarIcon(
-                            app = app,
-                            isRunning = true,
-                            isPinned = false,
-                            pinnedCount = pinnedApps.size,
-                            onClick = { onAppClick(app) },
-                        )
+                    if (unpinnedRunningApps.isNotEmpty()) {
+                        unpinnedRunningApps.forEach { app ->
+                            TaskbarIcon(
+                                app = app,
+                                isRunning = true,
+                                isPinned = false,
+                                pinnedCount = pinnedApps.size,
+                                onClick = { onAppClick(app) },
+                            )
+                        }
                     }
                 }
-
-                TaskbarDivider()
-            } else {
-                Spacer(modifier = Modifier.weight(1f))
             }
+
+            TaskbarDivider()
 
             TaskbarSystemTray(
                 state = systemState,

@@ -19,12 +19,15 @@ package com.android.axion.axpcmode.ui
 import android.content.Context
 import android.graphics.PixelFormat
 import android.util.Log
+import android.view.Display
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.WindowManager
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -32,14 +35,21 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.axion.axpcmode.services.TaskbarWindowManager
+import com.android.axion.axpcmode.ui.components.LocalTargetDisplayId
 import com.android.axion.compose.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import android.graphics.Color
 import android.view.View
 
-class PanelOverlayManager(private val context: Context) {
-    private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+class PanelOverlayManager(
+    private val context: Context,
+    private val targetDisplayId: Int = Display.DEFAULT_DISPLAY,
+    private val displayDensityDpi: StateFlow<Int>? = null,
+) {
+    private val windowManager: WindowManager =
+        TaskbarWindowManager.resolveWindowManager(context, targetDisplayId)
     private val views = mutableMapOf<String, ComposeView>()
     private val visibilityStates = mutableMapOf<String, MutableStateFlow<Boolean>>()
     private val gravities = mutableMapOf<String, Int>()
@@ -49,6 +59,11 @@ class PanelOverlayManager(private val context: Context) {
 
     private val autoHideTimers = mutableMapOf<String, Job>()
     private val autoHideConfigs = mutableMapOf<String, AutoHideConfig>()
+    private var onPanelShownListener: (() -> Unit)? = null
+
+    fun setOnPanelShownListener(listener: (() -> Unit)?) {
+        onPanelShownListener = listener
+    }
     private var edgeDetectorView: View? = null
 
     data class AutoHideConfig(
@@ -114,6 +129,7 @@ class PanelOverlayManager(private val context: Context) {
             }
 
             visibilityStates[id]?.value = true
+            onPanelShownListener?.invoke()
             return
         }
 
@@ -161,6 +177,7 @@ class PanelOverlayManager(private val context: Context) {
             mainScope.launch {
                 kotlinx.coroutines.delay(16)
                 visibility.value = true
+                onPanelShownListener?.invoke()
             }
         } catch (e: Exception) {
             Log.e("PanelOverlayManager", "Failed to add view: ${e.message}")
@@ -196,6 +213,29 @@ class PanelOverlayManager(private val context: Context) {
         }
     }
 
+    fun updateLayout(
+        id: String,
+        width: Int? = null,
+        height: Int? = null,
+        x: Int? = null,
+        y: Int? = null,
+    ) {
+        val view = views[id] ?: return
+        val lp = view.layoutParams as WindowManager.LayoutParams
+        var changed = false
+        width?.let { if (lp.width != it) { lp.width = it; changed = true } }
+        height?.let { if (lp.height != it) { lp.height = it; changed = true } }
+        x?.let { if (lp.x != it) { lp.x = it; changed = true } }
+        y?.let { if (lp.y != it) { lp.y = it; changed = true } }
+        if (changed) {
+            try {
+                windowManager.updateViewLayout(view, lp)
+            } catch (e: Exception) {
+                Log.e("PanelOverlayManager", "updateLayout failed: ${e.message}")
+            }
+        }
+    }
+
     private fun createComposeView(
         content: @Composable () -> Unit,
         visibilityState: MutableStateFlow<Boolean>,
@@ -209,28 +249,37 @@ class PanelOverlayManager(private val context: Context) {
                         ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
                     )
                     setContent {
-                        val isVisible by visibilityState.collectAsState()
-
-                        if (noAnimation) {
-
-                            if (isVisible) {
-                                content()
-                            }
+                        val dpi = displayDensityDpi?.collectAsState()?.value ?: 0
+                        val density = if (dpi > 0) {
+                            Density(dpi / 160f)
                         } else {
+                            LocalDensity.current
+                        }
+                        CompositionLocalProvider(
+                            LocalDensity provides density,
+                            LocalTargetDisplayId provides targetDisplayId,
+                        ) {
+                            val isVisible by visibilityState.collectAsState()
 
-                            val (enter, exit) =
-                                Pair(
-                                    slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                                    slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-                                )
+                            if (noAnimation) {
+                                if (isVisible) {
+                                    content()
+                                }
+                            } else {
+                                val (enter, exit) =
+                                    Pair(
+                                        slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                                        slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                                    )
 
-                            AnimatedVisibility(
-                                visible = isVisible,
-                                enter = enter,
-                                exit = exit,
-                                label = "PanelAnimation",
-                            ) {
-                                content()
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = enter,
+                                    exit = exit,
+                                    label = "PanelAnimation",
+                                ) {
+                                    content()
+                                }
                             }
                         }
                     }
@@ -289,6 +338,7 @@ class PanelOverlayManager(private val context: Context) {
     fun revealAutoHide(id: String) {
         val config = autoHideConfigs[id] ?: return
         visibilityStates[id]?.value = true
+        onPanelShownListener?.invoke()
         resetAutoHideTimer(id)
     }
 

@@ -16,8 +16,10 @@
 
 package com.android.axion.axpcmode.services
 
-import android.app.FreeformLauncher
 import android.content.Context
+import android.hardware.display.DisplayManager
+import android.util.DisplayMetrics
+import android.view.Display
 import android.view.Gravity
 import android.view.WindowManager
 import androidx.compose.runtime.snapshotFlow
@@ -31,7 +33,11 @@ import com.android.axion.axpcmode.ui.PanelOverlayManager
 import com.android.axion.axpcmode.ui.PcModeLauncherViewModel
 import com.android.axion.axpcmode.ui.QuickSettingsViewModel
 import com.android.axion.axpcmode.ui.components.ContextMenuState
+import com.android.axion.axpcmode.ui.components.taskbar.TaskPeekCard
+import com.android.axion.axpcmode.ui.components.taskbar.TaskPeekState
+import com.android.axion.axpcmode.ui.theme.AxPcModeTheme
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -43,46 +49,52 @@ class TaskbarPanelController(
     private val qsViewModel: QuickSettingsViewModel,
     private val mediaRepository: MediaRepository,
     private val contextMenuState: ContextMenuState,
+    private val peekState: TaskPeekState,
+    private val displayDensityDpi: StateFlow<Int>,
+    private val targetDisplayId: Int = Display.DEFAULT_DISPLAY,
 ) {
 
-    fun init() {
-        scope.launch {
-            combine(
-                    vm.showStartMenu,
-                    vm.showQuickSettingsPanel,
-                    vm.showNotificationPanel,
-                    vm.showMediaPlayer,
-                ) { states ->
-                    states.any { it }
-                }
-                .collect { isAnyShowing ->
-                    if (isAnyShowing) {
-                        FreeformLauncher.bringAllWindowsToBack()
-                    }
-                }
+    private fun resolveDisplayMetrics(): DisplayMetrics {
+        val dm = context.getSystemService(DisplayManager::class.java)
+        val display = dm?.getDisplay(targetDisplayId)
+        val metrics = DisplayMetrics()
+        if (display != null) {
+            display.getRealMetrics(metrics)
+            val dpi = displayDensityDpi.value
+            if (dpi > 0) metrics.density = dpi / 160f
+        } else {
+            context.resources.displayMetrics.let {
+                metrics.setTo(it)
+            }
         }
+        return metrics
+    }
+
+    fun init() {
+        val metrics = resolveDisplayMetrics()
+        val density = metrics.density
+        val screenWidthDp = metrics.widthPixels / density
+        val screenHeightPx = metrics.heightPixels
+
+        val taskbarYOffsetPx = (56 * density).toInt()
+        val panelPaddingPx = (12 * density).toInt()
+        val maxPanelHeightPx = screenHeightPx - taskbarYOffsetPx - panelPaddingPx
+
+        val startMenuMaxWidthDp = (screenWidthDp * 0.55f).coerceIn(360f, 720f)
+        val startMenuMaxWidthPx = (startMenuMaxWidthDp * density).toInt()
+
+        val qsEditorWidthPx = ((screenWidthDp * 0.55f).coerceIn(400f, 800f) * density).toInt()
 
         scope.launch {
             vm.showStartMenu.collect { show ->
                 if (show) {
-                    val resources = context.resources
-                    val density = resources.displayMetrics.density
-                    val screenHeight = resources.displayMetrics.heightPixels
-
-                    val widthPx = (550 * density).toInt()
-                    val taskbarHeightPx = (48 * density).toInt()
-                    val yOffsetPx = (56 * density).toInt()
-                    val paddingPx = (12 * density).toInt()
-
-                    val maxHeightPx = screenHeight - taskbarHeightPx - yOffsetPx - paddingPx
-
                     panelOverlayManager.show(
                         id = "start_menu",
                         content = { OverlayStartMenu(vm, contextMenuState) },
-                        gravity = Gravity.BOTTOM or Gravity.START,
-                        width = widthPx,
-                        height = maxHeightPx,
-                        y = yOffsetPx,
+                        gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL,
+                        width = startMenuMaxWidthPx,
+                        height = WindowManager.LayoutParams.WRAP_CONTENT,
+                        y = taskbarYOffsetPx,
                         focusable = true,
                         onOutsideClick = { vm.dismissAllPanels(fromOutside = true) },
                     )
@@ -97,8 +109,6 @@ class TaskbarPanelController(
                     show to edit
                 }
                 .collect { (show, edit) ->
-                    val density = context.resources.displayMetrics.density
-
                     if (show) {
                         if (edit) {
                             panelOverlayManager.hide("quick_settings")
@@ -106,10 +116,9 @@ class TaskbarPanelController(
                                 id = "quick_settings_editor",
                                 content = { OverlayQuickSettingsEditor(qsViewModel) },
                                 gravity = Gravity.BOTTOM or Gravity.END,
-                                width = (800 * density).toInt(),
+                                width = qsEditorWidthPx,
                                 height = WindowManager.LayoutParams.WRAP_CONTENT,
-                                x = (12 * density).toInt(),
-                                y = (56 * density).toInt(),
+                                y = taskbarYOffsetPx,
                                 focusable = true,
                                 onOutsideClick = {
                                     qsViewModel.toggleEditMode()
@@ -124,7 +133,7 @@ class TaskbarPanelController(
                                 gravity = Gravity.BOTTOM or Gravity.END,
                                 width = WindowManager.LayoutParams.WRAP_CONTENT,
                                 height = WindowManager.LayoutParams.WRAP_CONTENT,
-                                y = (56 * density).toInt(),
+                                y = taskbarYOffsetPx,
                                 onOutsideClick = { vm.dismissAllPanels(fromOutside = true) },
                             )
                         }
@@ -139,14 +148,13 @@ class TaskbarPanelController(
         scope.launch {
             vm.showNotificationPanel.collect { show ->
                 if (show) {
-                    val density = context.resources.displayMetrics.density
                     panelOverlayManager.show(
                         id = "notifications",
                         content = { OverlayNotificationPanel(vm) },
                         gravity = Gravity.BOTTOM or Gravity.END,
                         width = WindowManager.LayoutParams.WRAP_CONTENT,
                         height = WindowManager.LayoutParams.WRAP_CONTENT,
-                        y = (56 * density).toInt(),
+                        y = taskbarYOffsetPx,
                         onOutsideClick = { vm.dismissAllPanels(fromOutside = true) },
                     )
                 } else {
@@ -158,14 +166,13 @@ class TaskbarPanelController(
         scope.launch {
             vm.showMediaPlayer.collect { show ->
                 if (show) {
-                    val density = context.resources.displayMetrics.density
                     panelOverlayManager.show(
                         id = "media_player",
                         content = { OverlayMediaPlayer(vm, mediaRepository) },
                         gravity = Gravity.BOTTOM or Gravity.END,
                         width = WindowManager.LayoutParams.WRAP_CONTENT,
                         height = WindowManager.LayoutParams.WRAP_CONTENT,
-                        y = (56 * density).toInt(),
+                        y = taskbarYOffsetPx,
                         onOutsideClick = { vm.dismissAllPanels(fromOutside = true) },
                     )
                 } else {
@@ -187,6 +194,39 @@ class TaskbarPanelController(
                         )
                     } else {
                         panelOverlayManager.hide("context_menu")
+                    }
+                }
+        }
+
+        val peekWidthPx = (240 * density).toInt()
+        val peekYOffsetPx = taskbarYOffsetPx + (8 * density).toInt()
+
+        scope.launch {
+            snapshotFlow { peekState.peekedApp to peekState.anchorXPx }
+                .collect { (app, anchorX) ->
+                    if (app != null) {
+                        val xPos = (anchorX - peekWidthPx / 2f)
+                            .coerceIn(0f, (metrics.widthPixels - peekWidthPx).toFloat())
+                            .toInt()
+
+                        panelOverlayManager.show(
+                            id = "task_peek",
+                            content = {
+                                AxPcModeTheme {
+                                    TaskPeekCard(
+                                        app = app,
+                                        thumbnail = peekState.thumbnail,
+                                    )
+                                }
+                            },
+                            gravity = Gravity.BOTTOM or Gravity.START,
+                            width = peekWidthPx,
+                            height = WindowManager.LayoutParams.WRAP_CONTENT,
+                            x = xPos,
+                            y = peekYOffsetPx,
+                        )
+                    } else {
+                        panelOverlayManager.hide("task_peek")
                     }
                 }
         }

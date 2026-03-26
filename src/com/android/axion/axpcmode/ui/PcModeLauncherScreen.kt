@@ -16,7 +16,6 @@
 
 package com.android.axion.axpcmode.ui
 
-import android.app.FreeformLauncher
 import android.content.Intent
 import android.view.Gravity
 import androidx.compose.animation.*
@@ -26,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import android.view.Display
+import com.android.axion.axpcmode.services.SecondaryTaskbarService
 import com.android.axion.axpcmode.services.TaskbarService
 import com.android.axion.axpcmode.ui.components.*
 import com.android.axion.axpcmode.ui.windows.LocalTaskbarIconRegistry
@@ -43,12 +44,6 @@ fun PcModeLauncherScreen(viewModel: PcModeLauncherViewModel) {
     val showMediaPlayer by viewModel.showMediaPlayer.collectAsState()
     val isFocused by viewModel.isAxionPcModeFocused.collectAsState()
 
-    LaunchedEffect(showStartMenu, showNotificationPanel, showQuickSettingsPanel, showMediaPlayer) {
-        if (showStartMenu || showNotificationPanel || showQuickSettingsPanel || showMediaPlayer) {
-            FreeformLauncher.bringAllWindowsToBack()
-        }
-    }
-
     val pinnedApps by viewModel.pinnedApps.collectAsState()
     val allApps by viewModel.allApps.collectAsState()
     val desktopApps by viewModel.desktopApps.collectAsState()
@@ -63,10 +58,13 @@ fun PcModeLauncherScreen(viewModel: PcModeLauncherViewModel) {
         LocalTaskbarIconRegistry provides taskbarRegistry,
     ) {
         DisposableEffect(Unit) {
-            val serviceIntent =
-                Intent(context, TaskbarService::class.java).apply {
-                    action = TaskbarConstants.ACTION_START
-                }
+            val isSecondary = context.displayId != Display.DEFAULT_DISPLAY
+            val serviceClass = if (isSecondary)
+                SecondaryTaskbarService::class.java else TaskbarService::class.java
+            val serviceIntent = Intent(context, serviceClass).apply {
+                action = if (isSecondary)
+                    SecondaryTaskbarService.ACTION_START else TaskbarConstants.ACTION_START
+            }
             context.startForegroundService(serviceIntent)
 
             onDispose { overlayManager.hide("ContextMenu") }
@@ -99,7 +97,9 @@ fun PcModeLauncherScreen(viewModel: PcModeLauncherViewModel) {
             DesktopGrid(
                 apps = desktopApps,
                 pinnedApps = pinnedApps,
-                onAppClick = { app -> AppUtils.launchApp(context, app.packageName, app.className) },
+                onAppClick = { app ->
+                    AppUtils.launchApp(context, app.packageName, app.className, context.displayId)
+                },
                 onRemoveApp = { app ->
                     AppUtils.removeAppFromDesktop(context, app.packageName)
                     viewModel.updateDesktopApps(AppUtils.getDesktopApps(context))

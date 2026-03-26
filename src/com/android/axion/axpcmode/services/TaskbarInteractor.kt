@@ -16,50 +16,74 @@
 
 package com.android.axion.axpcmode.services
 
+import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
+import android.hardware.input.InputManager
+import android.os.SystemClock
 import android.util.Log
+import android.view.Display
+import android.view.InputDevice
+import android.view.KeyEvent
 import android.view.inputmethod.InputMethodManager
 import com.android.axion.axpcmode.activities.PcModeLauncherActivity
+import com.android.axion.axpcmode.activities.SecondaryPcModeLauncherActivity
 import com.android.axion.axpcmode.activities.TasksOverviewActivity
 import com.android.axion.axpcmode.ui.PcModeLauncherViewModel
 import com.android.axion.axpcmode.utils.AppInfo
 import com.android.axion.axpcmode.utils.AppUtils
 
+interface TaskbarHost {
+    fun hideTaskbarImmediately()
+    fun revealTaskbar()
+    fun resetAutoHideTimer()
+}
+
 class TaskbarInteractor(
     private val context: Context,
     private val viewModel: PcModeLauncherViewModel,
-    private val service: TaskbarService,
+    private val host: TaskbarHost,
     private val inputMethodManager: InputMethodManager,
+    val targetDisplayId: Int = Display.DEFAULT_DISPLAY,
 ) {
     companion object {
         private const val TAG = "TaskbarInteractor"
     }
+
+    private val inputManager: InputManager? =
+        context.getSystemService(InputManager::class.java)
 
     fun onStartClick() {
         viewModel.toggleStartMenu()
     }
 
     fun onAppClick(app: AppInfo) {
-        AppUtils.launchApp(context, app.packageName, app.className)
+        AppUtils.launchApp(context, app.packageName, app.className, targetDisplayId)
     }
 
     fun onRecentsClick() {
-        service.hideTaskbarImmediately()
-        val intent = Intent(context, TasksOverviewActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+        host.hideTaskbarImmediately()
+        try {
+            val intent = Intent(context, TasksOverviewActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent, makeDisplayOptions())
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to launch recents: ${e.message}")
+        }
     }
 
     fun onHomeClick() {
         try {
-            val intent = Intent(context, PcModeLauncherActivity::class.java)
+            val activityClass = if (targetDisplayId != Display.DEFAULT_DISPLAY)
+                SecondaryPcModeLauncherActivity::class.java
+            else PcModeLauncherActivity::class.java
+            val intent = Intent(context, activityClass)
             intent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
                     Intent.FLAG_ACTIVITY_CLEAR_TOP or
                     Intent.FLAG_ACTIVITY_SINGLE_TOP
             )
-            context.startActivity(intent)
+            context.startActivity(intent, makeDisplayOptions())
         } catch (e: Exception) {
             Log.e(TAG, "Failed to show desktop: ${e.message}")
         }
@@ -67,7 +91,15 @@ class TaskbarInteractor(
 
     fun onBackClick() {
         try {
-            Runtime.getRuntime().exec("input keyevent 4")
+            val now = SystemClock.uptimeMillis()
+            val down = KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK, 0, 0,
+                -1, 0, KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_KEYBOARD)
+            val up = KeyEvent(now, now, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK, 0, 0,
+                -1, 0, KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_KEYBOARD)
+            down.displayId = targetDisplayId
+            up.displayId = targetDisplayId
+            inputManager?.injectInputEvent(down, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC)
+            inputManager?.injectInputEvent(up, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to inject back key: ${e.message}")
         }
@@ -90,10 +122,17 @@ class TaskbarInteractor(
     }
 
     fun onRevealTaskbar() {
-        service.revealTaskbar()
+        host.revealTaskbar()
     }
 
     fun onUserInteraction() {
-        service.resetAutoHideTimer()
+        host.resetAutoHideTimer()
+    }
+
+    private fun makeDisplayOptions(): android.os.Bundle? {
+        if (targetDisplayId == Display.DEFAULT_DISPLAY) return null
+        return ActivityOptions.makeBasic().apply {
+            launchDisplayId = targetDisplayId
+        }.toBundle()
     }
 }

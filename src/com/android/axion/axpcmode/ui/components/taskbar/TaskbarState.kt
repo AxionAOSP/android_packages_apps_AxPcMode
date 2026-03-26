@@ -1,15 +1,25 @@
+/*
+ * Copyright (C) 2025-2026 AxionOS Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.axion.axpcmode.ui.components.taskbar
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.net.wifi.WifiManager
+import android.os.Bundle
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
-import com.android.axion.axpcmode.services.AxPlatformSettingsRepository
+import com.android.axion.platform.AxPlatformClient
+import com.android.axion.platform.IAxPlatformCallback
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlinx.coroutines.delay
@@ -32,17 +42,12 @@ class TaskbarSystemState(
 
 @Composable
 fun rememberTaskbarSystemState(): TaskbarSystemState {
-    val context = LocalContext.current.applicationContext
-
-    val wifiManager = remember { context.getSystemService(Context.WIFI_SERVICE) as WifiManager }
-    val bluetoothManager = remember {
-        context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-    }
+    val client = remember { AxPlatformClient.getInstance() }
 
     var wifiLevel by remember { mutableIntStateOf(0) }
     var isWifiConnected by remember { mutableStateOf(false) }
-    var isWifiEnabled by remember { mutableStateOf(wifiManager.isWifiEnabled) }
-    var isBtEnabled by remember { mutableStateOf(bluetoothManager?.adapter?.isEnabled ?: false) }
+    var isWifiEnabled by remember { mutableStateOf(false) }
+    var isBtEnabled by remember { mutableStateOf(false) }
 
     var batteryLevel by remember { mutableIntStateOf(0) }
     var isCharging by remember { mutableStateOf(false) }
@@ -64,90 +69,72 @@ fun rememberTaskbarSystemState(): TaskbarSystemState {
         }
     }
 
-    val repository = remember { AxPlatformSettingsRepository(context) }
-    val mobileDataJson by repository.mobileDataInfo.collectAsState(initial = null)
-    val mobileDataEnabledSetting by repository.mobileDataEnabled.collectAsState(initial = false)
-    val batteryJson by repository.batteryInfo.collectAsState(initial = null)
-    val bluetoothJson by repository.bluetoothInfo.collectAsState(initial = null)
-
-    LaunchedEffect(mobileDataJson) {
-        if (mobileDataJson != null) {
-            mobileDataJson?.let {
-                mobileDataLevel = it.optInt("level", 4)
-                val type = it.optString("type")
-                mobileDataType = type
-
-                isSimPresent = it.has("level")
-            }
-        } else {
-
-            isSimPresent = false
-            mobileDataLevel = 0
-            mobileDataType = ""
-        }
-    }
-
-    LaunchedEffect(mobileDataEnabledSetting) { isMobileDataEnabled = mobileDataEnabledSetting }
-
-    LaunchedEffect(batteryJson) {
-        batteryJson?.let {
-            batteryLevel = it.optInt("level", 0)
-            val charging = it.optBoolean("charging", false)
-            val plugged = it.optBoolean("pluggedIn", false)
-            isCharging = charging || plugged
-        }
-    }
-
-    LaunchedEffect(bluetoothJson) {
-        bluetoothJson?.let { devices ->
-            var bestLevel = -1
-            for (i in 0 until devices.length()) {
-                val dev = devices.optJSONObject(i)
-                if (dev?.optBoolean("isConnected", false) == true) {
-                    val level = dev.optInt("batteryLevel", -1)
-                    if (level > -1) {
-                        bestLevel = level
-                        break
+    DisposableEffect(client) {
+        val callback = object : IAxPlatformCallback.Stub() {
+            override fun onStateChanged(key: String, state: Bundle) {
+                when (key) {
+                    AxPlatformClient.KEY_BATTERY -> {
+                        batteryLevel = state.getInt("level", 0)
+                        isCharging = state.getBoolean("isCharging", false) ||
+                            state.getBoolean("isPluggedIn", false)
+                    }
+                    AxPlatformClient.FEATURE_MOBILE_DATA -> {
+                        isMobileDataEnabled = state.getBoolean("active", false)
+                        mobileDataLevel = state.getInt("level", 4)
+                        mobileDataType = state.getString("type", "")
+                        isSimPresent = state.getBoolean("available", true)
+                    }
+                    AxPlatformClient.FEATURE_BLUETOOTH -> {
+                        isBtEnabled = state.getBoolean("active", false)
+                        val devices = state.getParcelableArrayList<Bundle>("devices")
+                        var bestLevel = -1
+                        devices?.forEach { dev ->
+                            if (dev.getBoolean("isConnected", false)) {
+                                val level = dev.getInt("batteryLevel", -1)
+                                if (level > -1) {
+                                    bestLevel = level
+                                    return@forEach
+                                }
+                            }
+                        }
+                        bluetoothBatteryLevel = bestLevel
+                    }
+                    AxPlatformClient.FEATURE_WIFI -> {
+                        isWifiEnabled = state.getBoolean("active", false)
+                        isWifiConnected = state.getBoolean("connected", false)
+                    }
+                    AxPlatformClient.KEY_WIFI_SCAN -> {
+                        val networks = state.getParcelableArrayList<Bundle>("networks")
+                        val connected = networks?.firstOrNull {
+                            it.getBoolean("isConnected", false)
+                        }
+                        wifiLevel = connected?.getInt("level", 0) ?: 0
                     }
                 }
             }
-            bluetoothBatteryLevel = bestLevel
         }
-    }
 
-    DisposableEffect(context) {
-        val receiver =
-            object : BroadcastReceiver() {
-                override fun onReceive(context: Context?, intent: Intent?) {
-                    when (intent?.action) {
-                        WifiManager.RSSI_CHANGED_ACTION,
-                        WifiManager.WIFI_STATE_CHANGED_ACTION -> {
-                            @Suppress("DEPRECATION") val info = wifiManager.connectionInfo
-                            isWifiConnected = info.networkId != -1
-                            wifiLevel = wifiManager.calculateSignalLevel(info.rssi)
-                            isWifiEnabled = wifiManager.isWifiEnabled
-                        }
-                        BluetoothAdapter.ACTION_STATE_CHANGED -> {
-                            isBtEnabled = bluetoothManager?.adapter?.isEnabled ?: false
-                        }
-                    }
-                }
-            }
+        client.registerCallback(callback)
 
-        val filter =
-            IntentFilter().apply {
-                addAction(WifiManager.RSSI_CHANGED_ACTION)
-                addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
-                addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
-            }
-        context.registerReceiver(receiver, filter)
+        val battery = client.getState(AxPlatformClient.KEY_BATTERY)
+        batteryLevel = battery.getInt("level", 0)
+        isCharging = battery.getBoolean("isCharging", false) ||
+            battery.getBoolean("isPluggedIn", false)
 
-        val info = wifiManager.connectionInfo
-        isWifiConnected = info.networkId != -1
-        wifiLevel = wifiManager.calculateSignalLevel(info.rssi)
-        isWifiEnabled = wifiManager.isWifiEnabled
+        val mobile = client.getState(AxPlatformClient.FEATURE_MOBILE_DATA)
+        isMobileDataEnabled = mobile.getBoolean("active", false)
+        mobileDataLevel = mobile.getInt("level", 4)
+        mobileDataType = mobile.getString("type", "")
+        isSimPresent = mobile.getBoolean("available", true)
 
-        onDispose { context.unregisterReceiver(receiver) }
+        val bt = client.getState(AxPlatformClient.FEATURE_BLUETOOTH)
+        isBtEnabled = bt.getBoolean("active", false)
+
+        val wifi = client.getState(AxPlatformClient.FEATURE_WIFI)
+        isWifiEnabled = wifi.getBoolean("active", false)
+        isWifiConnected = wifi.getBoolean("connected", false)
+
+        onDispose { client.unregisterCallback(callback) }
     }
 
     return TaskbarSystemState(

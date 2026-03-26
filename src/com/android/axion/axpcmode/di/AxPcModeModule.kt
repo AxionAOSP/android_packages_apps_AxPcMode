@@ -17,6 +17,7 @@
 package com.android.axion.axpcmode.di
 
 import android.content.Context
+import com.android.axion.axpcmode.services.AxPlatformRepository
 import com.android.axion.axpcmode.services.MediaRepository
 import com.android.axion.axpcmode.services.QuickSettingsRepository
 import com.android.axion.axpcmode.services.TaskbarNotificationHelper
@@ -57,14 +58,21 @@ object AxPcModeModule {
 
     @Provides
     @Singleton
+    fun provideAxPlatformRepository(
+        @ApplicationContext context: Context
+    ): AxPlatformRepository = AxPlatformRepository(context)
+
+    @Provides
+    @Singleton
     fun provideMediaRepository(@ApplicationContext context: Context): MediaRepository =
         MediaRepository(context)
 
     @Provides
     @Singleton
     fun provideQuickSettingsRepository(
-        @ApplicationContext context: Context
-    ): QuickSettingsRepository = QuickSettingsRepository(context)
+        @ApplicationContext context: Context,
+        platformRepo: AxPlatformRepository,
+    ): QuickSettingsRepository = QuickSettingsRepository(context, platformRepo)
 
     @Provides
     @Singleton

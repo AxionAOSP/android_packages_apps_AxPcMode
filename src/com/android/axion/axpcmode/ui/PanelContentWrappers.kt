@@ -16,9 +16,11 @@
 
 package com.android.axion.axpcmode.ui
 
+import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.view.Display
 import android.view.inputmethod.InputMethodManager
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
@@ -39,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.axion.axpcmode.R
 import com.android.axion.axpcmode.activities.PcModeLauncherActivity
+import com.android.axion.axpcmode.activities.SecondaryPcModeLauncherActivity
 import com.android.axion.axpcmode.activities.TasksOverviewActivity
 import com.android.axion.axpcmode.services.MediaRepository
 import com.android.axion.axpcmode.ui.components.*
@@ -54,6 +57,7 @@ fun OverlayTaskbar(
     taskbarRegistry: TaskbarIconRegistry,
 ) {
     val context = LocalContext.current
+    val displayId = LocalTargetDisplayId.current
     val pinnedApps by viewModel.pinnedApps.collectAsState()
     val runningApps by viewModel.runningApps.collectAsState()
 
@@ -83,18 +87,21 @@ fun OverlayTaskbar(
                         }
                     },
                     onHomeClick = {
-                        val intent = Intent(context, PcModeLauncherActivity::class.java)
+                        val activityClass = if (displayId != Display.DEFAULT_DISPLAY)
+                            SecondaryPcModeLauncherActivity::class.java
+                        else PcModeLauncherActivity::class.java
+                        val intent = Intent(context, activityClass)
                         intent.addFlags(
                             Intent.FLAG_ACTIVITY_NEW_TASK or
                                 Intent.FLAG_ACTIVITY_CLEAR_TOP or
                                 Intent.FLAG_ACTIVITY_SINGLE_TOP
                         )
-                        context.startActivity(intent)
+                        context.startActivity(intent, displayOpts(displayId))
                     },
                     onRecentsClick = {
                         val intent = Intent(context, TasksOverviewActivity::class.java)
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(intent)
+                        context.startActivity(intent, displayOpts(displayId))
                     },
                     onImeClick = {
                         val imm =
@@ -103,7 +110,7 @@ fun OverlayTaskbar(
                         imm.showInputMethodPicker()
                     },
                     onAppClick = { app ->
-                        AppUtils.launchApp(context, app.packageName, app.className)
+                        AppUtils.launchApp(context, app.packageName, app.className, displayId)
                     },
                     onNotificationClick = { viewModel.toggleNotificationPanel() },
                     onQuickSettingsClick = { viewModel.toggleQuickSettingsPanel() },
@@ -116,8 +123,12 @@ fun OverlayTaskbar(
 }
 
 @Composable
-fun OverlayStartMenu(viewModel: PcModeLauncherViewModel, contextMenuState: ContextMenuState) {
+fun OverlayStartMenu(
+    viewModel: PcModeLauncherViewModel,
+    contextMenuState: ContextMenuState,
+) {
     val context = LocalContext.current
+    val displayId = LocalTargetDisplayId.current
     val allApps by viewModel.allApps.collectAsState()
     val pinnedApps by viewModel.pinnedApps.collectAsState()
     val desktopApps by viewModel.desktopApps.collectAsState()
@@ -130,18 +141,23 @@ fun OverlayStartMenu(viewModel: PcModeLauncherViewModel, contextMenuState: Conte
             LocalWindowScreenOffset provides windowOffset,
         ) {
             Box(
-                contentAlignment = Alignment.BottomStart,
                 modifier =
-                    Modifier.onGloballyPositioned { coords ->
-                        windowOffset = coords.positionOnScreen()
-                    },
+                    Modifier
+                        .fillMaxWidth()
+                        .windowInsetsPadding(
+                            WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal)
+                        )
+                        .imePadding()
+                        .onGloballyPositioned { coords ->
+                            windowOffset = coords.positionOnScreen()
+                        },
             ) {
                 StartMenu(
                     allApps = allApps,
                     pinnedApps = pinnedApps,
                     desktopApps = desktopApps,
                     onAppClick = { app ->
-                        AppUtils.launchApp(context, app.packageName, app.className)
+                        AppUtils.launchApp(context, app.packageName, app.className, displayId)
                         viewModel.dismissAllPanels()
                     },
                     onAddToDesktop = { app ->
@@ -164,7 +180,8 @@ fun OverlayStartMenu(viewModel: PcModeLauncherViewModel, contextMenuState: Conte
                         viewModel.onRefreshPinnedApps?.invoke()
                         viewModel.dismissAllPanels()
                     },
-                    modifier = Modifier.padding(start = 12.dp, top = 6.dp, bottom = 6.dp),
+                    onExitPcMode = { viewModel.onExitPcMode?.invoke() },
+                    modifier = Modifier.padding(6.dp),
                 )
             }
         }
@@ -174,10 +191,16 @@ fun OverlayStartMenu(viewModel: PcModeLauncherViewModel, contextMenuState: Conte
 @Composable
 fun OverlayQuickSettings(viewModel: PcModeLauncherViewModel, qsViewModel: QuickSettingsViewModel) {
     AxPcModeTheme {
-        Box(contentAlignment = Alignment.BottomEnd) {
+        Box(
+            contentAlignment = Alignment.BottomEnd,
+            modifier = Modifier.windowInsetsPadding(
+                WindowInsets.displayCutout.only(WindowInsetsSides.End)
+            ),
+        ) {
             QuickSettingsPanel(
                 viewModel = qsViewModel,
                 modifier = Modifier.padding(top = 6.dp, bottom = 6.dp, end = 12.dp),
+                targetDisplayId = LocalTargetDisplayId.current,
             )
         }
     }
@@ -231,7 +254,12 @@ fun OverlayQuickSettingsEditor(viewModel: QuickSettingsViewModel) {
 @Composable
 fun OverlayNotificationPanel(viewModel: PcModeLauncherViewModel) {
     AxPcModeTheme {
-        Box(contentAlignment = Alignment.BottomEnd) {
+        Box(
+            contentAlignment = Alignment.BottomEnd,
+            modifier = Modifier.windowInsetsPadding(
+                WindowInsets.displayCutout.only(WindowInsetsSides.End)
+            ),
+        ) {
             NotificationPanel(modifier = Modifier.padding(top = 6.dp, bottom = 6.dp, end = 12.dp))
         }
     }
@@ -240,7 +268,12 @@ fun OverlayNotificationPanel(viewModel: PcModeLauncherViewModel) {
 @Composable
 fun OverlayMediaPlayer(viewModel: PcModeLauncherViewModel, mediaRepository: MediaRepository) {
     AxPcModeTheme {
-        Box(contentAlignment = Alignment.BottomEnd) {
+        Box(
+            contentAlignment = Alignment.BottomEnd,
+            modifier = Modifier.windowInsetsPadding(
+                WindowInsets.displayCutout.only(WindowInsetsSides.End)
+            ),
+        ) {
             MediaPlayerCard(
                 mediaRepository = mediaRepository,
                 modifier = Modifier.padding(start = 12.dp, top = 6.dp, bottom = 6.dp, end = 12.dp),
@@ -256,4 +289,9 @@ fun OverlayContextMenu(contextMenuState: ContextMenuState) {
             ContextMenuOverlay()
         }
     }
+}
+
+private fun displayOpts(displayId: Int): android.os.Bundle? {
+    if (displayId == Display.DEFAULT_DISPLAY) return null
+    return ActivityOptions.makeBasic().apply { launchDisplayId = displayId }.toBundle()
 }

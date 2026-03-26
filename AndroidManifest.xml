@@ -38,6 +38,7 @@
         android:icon="@drawable/ic_axion_logo"
         android:supportsRtl="true"
         android:persistent="true"
+        android:singleUser="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
 
         <activity
@@ -47,7 +48,19 @@
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
             android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
+
+        <activity
+            android:name=".activities.SecondaryPcModeLauncherActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".activities.PcModeAnimationActivity"
@@ -56,6 +69,13 @@
             android:screenOrientation="landscape"
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+
+        <activity
+            android:name=".activities.MousePadActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen" />
 
         <activity
             android:name=".activities.TasksOverviewActivity"
@@ -68,10 +88,6 @@
             <intent-filter>
                 <action android:name="com.android.systemui.TOGGLE_RECENTS" />
                 <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.SECONDARY_HOME" />
             </intent-filter>
         </activity>
 
@@ -87,6 +103,11 @@
 
         <service
             android:name=".services.TaskbarService"
+            android:foregroundServiceType="systemExempted"
+            android:exported="false" />
+
+        <service
+            android:name=".services.SecondaryTaskbarService"
             android:foregroundServiceType="systemExempted"
             android:exported="false" />
 

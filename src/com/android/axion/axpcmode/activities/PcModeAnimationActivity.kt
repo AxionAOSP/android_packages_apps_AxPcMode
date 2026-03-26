@@ -3,6 +3,7 @@ package com.android.axion.axpcmode.activities
 import android.graphics.Path as AndroidPath
 import android.graphics.PathMeasure
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
@@ -40,8 +41,16 @@ import kotlinx.coroutines.delay
 
 class PcModeAnimationActivity : ComponentActivity() {
 
+    companion object {
+        private const val TAG = "PcModeAnimationActivity"
+        const val EXTRA_EXIT_PC_MODE = "exit_pc_mode"
+    }
+
+    private var shouldExitPcMode = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        shouldExitPcMode = intent?.getBooleanExtra(EXTRA_EXIT_PC_MODE, false) == true
         enableEdgeToEdge()
 
         onBackPressedDispatcher.addCallback(
@@ -58,7 +67,14 @@ class PcModeAnimationActivity : ComponentActivity() {
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
-        setContent { AxPcModeTheme { PcModeExitAnimation(onExitComplete = { finishAffinity() }) } }
+        setContent { AxPcModeTheme { PcModeExitAnimation(onExitComplete = { onAnimationComplete() }) } }
+    }
+
+    private fun onAnimationComplete() {
+        if (shouldExitPcMode) {
+            Settings.Secure.putInt(contentResolver, "ax_pc_mode", 0)
+        }
+        finishAffinity()
     }
 
     @Composable

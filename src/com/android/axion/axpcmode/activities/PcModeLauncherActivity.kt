@@ -19,6 +19,8 @@ package com.android.axion.axpcmode.activities
 import android.graphics.Path as AndroidPath
 import android.graphics.PathMeasure
 import android.os.Bundle
+import android.os.UserHandle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
@@ -48,6 +50,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.axion.axpcmode.services.NotificationManagerHelper
+import com.android.axion.axpcmode.services.TaskbarService
 import com.android.axion.axpcmode.ui.PcModeLauncherScreen
 import com.android.axion.axpcmode.ui.PcModeLauncherViewModel
 import com.android.axion.axpcmode.ui.theme.AxPcModeTheme
@@ -76,8 +79,17 @@ class PcModeLauncherActivity : Hilt_PcModeLauncherActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemBars()
 
+        val pcModeEnabled = Settings.Secure.getIntForUser(
+            contentResolver, "ax_pc_mode", 0, UserHandle.USER_CURRENT) == 1
+        if (!pcModeEnabled) {
+            finish()
+            return
+        }
+
         notificationHelper = NotificationManagerHelper(this)
         notificationHelper?.register()
+
+        TaskbarService.start(this)
 
         setContent {
             AxPcModeTheme {
@@ -200,6 +212,11 @@ class PcModeLauncherActivity : Hilt_PcModeLauncherActivity() {
                 drawPath(path = aPath, color = letterColor.copy(alpha = fillAlpha * alpha))
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        window.decorView.post { hideSystemBars() }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

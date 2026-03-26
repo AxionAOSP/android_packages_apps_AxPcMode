@@ -18,15 +18,20 @@ package com.android.axion.axpcmode.services
 
 import android.content.Context
 import android.graphics.PixelFormat
+import android.hardware.display.DisplayManager
 import android.util.Log
+import android.view.Display
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.ui.platform.ComposeView
 
-class TaskbarWindowManager(private val context: Context) {
+class TaskbarWindowManager(
+    private val context: Context,
+    targetDisplayId: Int = Display.DEFAULT_DISPLAY,
+) {
 
-    private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val windowManager: WindowManager = resolveWindowManager(context, targetDisplayId)
     private var taskbarView: View? = null
     private var hintView: View? = null
 
@@ -100,7 +105,47 @@ class TaskbarWindowManager(private val context: Context) {
         hintView = null
     }
 
+    fun setTaskbarTouchable(touchable: Boolean) = updateTouchable(taskbarView, touchable)
+
+    fun setHintTouchable(touchable: Boolean) = updateTouchable(hintView, touchable)
+
+    private fun updateTouchable(view: View?, touchable: Boolean) {
+        val v = view ?: return
+        val lp = v.layoutParams as WindowManager.LayoutParams
+        val newFlags = if (touchable) {
+            lp.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+        } else {
+            lp.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        }
+        if (lp.flags != newFlags) {
+            lp.flags = newFlags
+            try {
+                windowManager.updateViewLayout(v, lp)
+            } catch (e: Exception) {
+                Log.e("TaskbarWindowManager", "updateTouchable failed: ${e.message}")
+            }
+        }
+    }
+
     fun getTaskbarView(): View? = taskbarView
 
     fun getHintView(): View? = hintView
+
+    companion object {
+        fun resolveWindowManager(context: Context, displayId: Int): WindowManager {
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                val dm = context.getSystemService(DisplayManager::class.java)
+                val display = dm?.getDisplay(displayId)
+                if (display != null) {
+                    val windowContext = context.createWindowContext(
+                        display,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        null,
+                    )
+                    return windowContext.getSystemService(WindowManager::class.java)
+                }
+            }
+            return context.getSystemService(WindowManager::class.java)
+        }
+    }
 }

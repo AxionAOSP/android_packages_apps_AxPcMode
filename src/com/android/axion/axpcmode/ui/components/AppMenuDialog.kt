@@ -16,6 +16,7 @@
 
 package com.android.axion.axpcmode.ui.components
 
+import android.view.Display
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -32,7 +33,7 @@ import com.android.axion.axpcmode.utils.AppInfo
 import com.android.axion.axpcmode.utils.AppUtils
 
 @Composable
-fun AppMenuDialog(app: AppInfo, onDismiss: () -> Unit, onUnpin: () -> Unit) {
+fun AppMenuDialog(app: AppInfo, onDismiss: () -> Unit, onUnpin: () -> Unit, displayId: Int = Display.DEFAULT_DISPLAY) {
     val context = LocalContext.current
 
     Dialog(onDismissRequest = onDismiss) {
@@ -62,7 +63,7 @@ fun AppMenuDialog(app: AppInfo, onDismiss: () -> Unit, onUnpin: () -> Unit) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     TextButton(
                         onClick = {
-                            AppUtils.launchAppInfo(context, app.packageName)
+                            AppUtils.launchAppInfo(context, app.packageName, displayId)
                             onDismiss()
                         },
                         modifier = Modifier.fillMaxWidth(),

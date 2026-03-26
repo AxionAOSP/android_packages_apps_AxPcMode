@@ -16,8 +16,10 @@
 
 package com.android.axion.axpcmode.ui.components
 
+import android.app.ActivityOptions
 import android.content.Intent
 import android.provider.Settings
+import android.view.Display
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -57,15 +59,11 @@ import com.android.axion.axpcmode.services.QSTileData
 import com.android.axion.axpcmode.ui.QuickSettingsViewModel
 import com.android.axion.axpcmode.ui.components.qs.*
 import com.android.axion.axpcmode.ui.tiles.TileIconMapping
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun QuickSettingsPanel(viewModel: QuickSettingsViewModel, modifier: Modifier = Modifier) {
+fun QuickSettingsPanel(viewModel: QuickSettingsViewModel, modifier: Modifier = Modifier, targetDisplayId: Int = Display.DEFAULT_DISPLAY) {
     val context = LocalContext.current
-    val isBtEnabled by viewModel.isBtEnabled.collectAsState()
-    val btDevicesJson by viewModel.btDevicesJson.collectAsState()
     val isAutoBrightness by viewModel.isAutoBrightness.collectAsState()
     val currentVolume by viewModel.volume.collectAsState()
     val maxVolume by viewModel.maxVolume.collectAsState()
@@ -75,20 +73,6 @@ fun QuickSettingsPanel(viewModel: QuickSettingsViewModel, modifier: Modifier = M
 
     val configuration = LocalConfiguration.current
     val safeMaxHeight = (configuration.screenHeightDp - 80).dp
-
-    DisposableEffect(Unit) {
-        val current = Settings.Secure.getInt(context.contentResolver, "ax_qs_listeners_count", 0)
-        Settings.Secure.putInt(context.contentResolver, "ax_qs_listeners_count", current + 1)
-        onDispose {
-            val current =
-                Settings.Secure.getInt(context.contentResolver, "ax_qs_listeners_count", 0)
-            Settings.Secure.putInt(
-                context.contentResolver,
-                "ax_qs_listeners_count",
-                maxOf(0, current - 1),
-            )
-        }
-    }
 
     Surface(
         modifier =
@@ -191,8 +175,13 @@ fun QuickSettingsPanel(viewModel: QuickSettingsViewModel, modifier: Modifier = M
                         try {
                             val intent = Intent(Settings.ACTION_SETTINGS)
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
+                            val opts = if (targetDisplayId != Display.DEFAULT_DISPLAY) {
+                                ActivityOptions.makeBasic().apply {
+                                    launchDisplayId = targetDisplayId
+                                }.toBundle()
+                            } else null
+                            context.startActivity(intent, opts)
+                        } catch (_: Exception) {
                         }
                     }
                 ) {
@@ -319,7 +308,6 @@ fun QsTileEditor(
                                                         AvailableTileData(
                                                             spec = removed.spec,
                                                             label = removed.label,
-                                                            isSystem = true,
                                                         )
                                                     )
                                                     viewModel.saveTiles(dragDropState.tileSpecs())
@@ -379,7 +367,6 @@ fun QsTileEditor(
                                     AvailableTileData(
                                         spec = removed.spec,
                                         label = removed.label,
-                                        isSystem = true,
                                     )
                                 )
                                 viewModel.saveTiles(dragDropState.tileSpecs())

@@ -16,12 +16,10 @@
 
 package com.android.axion.axpcmode.ui.components
 
-import android.app.FreeformLauncher
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Process
 import android.os.UserManager
-import android.provider.Settings
 import android.util.Log
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -76,7 +74,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.axion.axpcmode.utils.AppInfo
+import com.android.axion.axpcmode.utils.AppUtils
 import com.android.axion.axpcmode.R
+
+private val MAX_GRID_HEIGHT = 400.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,6 +89,7 @@ fun StartMenu(
     onAddToDesktop: (AppInfo) -> Unit,
     onRemoveFromDesktop: (AppInfo) -> Unit,
     onAddToTaskbar: (AppInfo) -> Unit,
+    onExitPcMode: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -110,128 +112,21 @@ fun StartMenu(
         } catch (e: Exception) {}
     }
 
-    val configuration = LocalConfiguration.current
-    val safeMaxHeight = (configuration.screenHeightDp - 60).dp
-
     Surface(
         modifier =
             modifier
-                .width(600.dp)
-                .heightIn(max = safeMaxHeight)
-                .padding(top = 12.dp, bottom = 12.dp, start = 12.dp),
+                .fillMaxWidth()
+                .padding(12.dp),
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surfaceContainer,
         shadowElevation = 8.dp,
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier =
-                        Modifier.size(36.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceBright),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (userIcon != null) {
-                        Image(
-                            bitmap = userIcon!!.asImageBitmap(),
-                            contentDescription = userName,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                        )
-                    } else {
-                        Text(
-                            text = userName.firstOrNull()?.toString()?.uppercase() ?: "U",
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-                }
-
-                Spacer(Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(0.3f)) {
-                    Text(
-                        text = userName,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.labelLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-
-                Spacer(Modifier.width(16.dp))
-
-                TextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    modifier = Modifier.weight(0.7f),
-                    placeholder = {
-                        Text(
-                            stringResource(R.string.search_apps_hint),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    },
-                    shape = MaterialTheme.shapes.extraLarge,
-                    colors =
-                        TextFieldDefaults.colors(
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
-                            cursorColor = MaterialTheme.colorScheme.onSurface,
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        ),
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.bodyMedium,
-                )
-
-                Spacer(Modifier.width(16.dp))
-
-                val powerInteractionSource = remember { MutableInteractionSource() }
-                val powerPressed by powerInteractionSource.collectIsPressedAsState()
-                val powerScale by
-                    animateFloatAsState(if (powerPressed) 0.9f else 1f, label = "power_scale")
-
-                FilledTonalIconButton(
-                    onClick = { Settings.Secure.putInt(context.contentResolver, "ax_pc_mode", 0) },
-                    modifier =
-                        Modifier.size(40.dp).graphicsLayer {
-                            scaleX = powerScale
-                            scaleY = powerScale
-                        },
-                    colors =
-                        IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        ),
-                ) {
-                    Icon(
-                        Icons.Filled.DesktopAccessDisabled,
-                        "Exit PC Mode",
-                        modifier = Modifier.size(22.dp),
-                    )
-                }
-            }
-
             Column(
                 modifier = Modifier
                     .weight(1f, fill = false)
                     .fillMaxWidth()
+                    .heightIn(max = MAX_GRID_HEIGHT)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -266,8 +161,98 @@ fun StartMenu(
                         }
                     }
                 }
-                
-                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.weight(1f),
+                    placeholder = {
+                        Text(
+                            stringResource(R.string.search_apps_hint),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    },
+                    trailingIcon = {
+                        Box(
+                            modifier =
+                                Modifier.size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (userIcon != null) {
+                                Image(
+                                    bitmap = userIcon!!.asImageBitmap(),
+                                    contentDescription = userName,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            } else {
+                                Text(
+                                    text = userName.firstOrNull()?.toString()?.uppercase() ?: "U",
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        }
+                    },
+                    shape = MaterialTheme.shapes.extraLarge,
+                    colors =
+                        TextFieldDefaults.colors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
+                            cursorColor = MaterialTheme.colorScheme.onSurface,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        ),
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                )
+
+                val powerInteractionSource = remember { MutableInteractionSource() }
+                val powerPressed by powerInteractionSource.collectIsPressedAsState()
+                val powerScale by
+                    animateFloatAsState(if (powerPressed) 0.9f else 1f, label = "power_scale")
+
+                FilledIconButton(
+                    onClick = onExitPcMode,
+                    modifier =
+                        Modifier.size(40.dp).graphicsLayer {
+                            scaleX = powerScale
+                            scaleY = powerScale
+                        },
+                    colors =
+                        IconButtonDefaults.filledIconButtonColors(
+                            containerColor = Color.Red,
+                            contentColor = Color.White,
+                        ),
+                ) {
+                    Icon(
+                        Icons.Filled.DesktopAccessDisabled,
+                        "Exit PC Mode",
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
             }
         }
     }
@@ -285,9 +270,11 @@ fun StartMenuAppItem(
     onAddToTaskbar: () -> Unit,
 ) {
     val appIconBitmap = remember(app) { app.icon.toBitmap().asImageBitmap() }
+    val context = LocalContext.current
 
     val contextMenuState = LocalContextMenuState.current
     val windowOffset = LocalWindowScreenOffset.current
+    val targetDisplayId = LocalTargetDisplayId.current
     var iconCenterLocal by remember { mutableStateOf(Offset.Zero) }
     var isFocused by remember { mutableStateOf(false) }
     val focusColor = MaterialTheme.colorScheme.primary
@@ -329,7 +316,7 @@ fun StartMenuAppItem(
                         label = strFloatingWindow,
                         icon = Icons.Filled.Fullscreen,
                     ) {
-                        FreeformLauncher.launchDesktopApp(app.packageName, app.className)
+                        AppUtils.launchAppInFreeform(context, app.packageName, app.className, targetDisplayId)
                     },
                     ContextMenuAction(
                         label = if (isOnDesktop) strRemoveFromDesktop else strAddToDesktop,

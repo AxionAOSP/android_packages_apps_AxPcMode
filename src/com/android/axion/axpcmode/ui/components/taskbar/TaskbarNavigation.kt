@@ -45,9 +45,9 @@ fun TaskbarNavigation(
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         FocusableNavButton(
-            icon = Icons.Rounded.ArrowBack,
-            contentDescription = "Back",
-            onClick = onBackClick,
+            icon = Icons.Rounded.CropSquare,
+            contentDescription = "Recents",
+            onClick = onRecentsClick,
         )
 
         FocusableNavButton(
@@ -57,9 +57,9 @@ fun TaskbarNavigation(
         )
 
         FocusableNavButton(
-            icon = Icons.Rounded.CropSquare,
-            contentDescription = "Recents",
-            onClick = onRecentsClick,
+            icon = Icons.Rounded.ArrowBack,
+            contentDescription = "Back",
+            onClick = onBackClick,
         )
     }
 }

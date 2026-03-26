@@ -33,14 +33,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.graphics.drawable.toBitmap
 import com.android.axion.axpcmode.utils.AppInfo
-import com.android.axion.axpcmode.utils.AppUtils
+import com.android.axion.compose.applist.AppFilter
+import com.android.axion.compose.applist.rememberAppList
 
 @Composable
 fun AppPickerDialog(onDismiss: () -> Unit, onAppSelected: (AppInfo) -> Unit) {
     val context = LocalContext.current
-    var allApps by remember { mutableStateOf<List<AppInfo>>(emptyList()) }
-
-    LaunchedEffect(Unit) { allApps = AppUtils.getInstalledApps(context) }
+    val allApps by rememberAppList(AppFilter.LAUNCHABLE_ONLY)
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -56,24 +55,33 @@ fun AppPickerDialog(onDismiss: () -> Unit, onAppSelected: (AppInfo) -> Unit) {
                 )
 
                 LazyColumn(modifier = Modifier.weight(1f).padding(horizontal = 16.dp)) {
-                    items(allApps) { app ->
+                    items(allApps) { entry ->
                         Row(
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .clickable { onAppSelected(app) }
+                                    .clickable {
+                                        onAppSelected(
+                                            AppInfo(
+                                                packageName = entry.packageName,
+                                                className = entry.className,
+                                                label = entry.label,
+                                                icon = entry.icon,
+                                            )
+                                        )
+                                    }
                                     .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Image(
-                                painter = BitmapPainter(app.icon.toBitmap().asImageBitmap()),
-                                contentDescription = app.label,
+                                painter = BitmapPainter(entry.icon.toBitmap().asImageBitmap()),
+                                contentDescription = entry.label,
                                 modifier = Modifier.size(40.dp),
                             )
 
                             Spacer(modifier = Modifier.width(16.dp))
 
                             Text(
-                                text = app.label,
+                                text = entry.label,
                                 style = MaterialTheme.typography.bodyLarge,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,

@@ -17,6 +17,7 @@
 package com.android.axion.axpcmode.services
 
 import android.content.Context
+import android.view.Display
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -31,7 +32,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
@@ -40,14 +40,18 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.axion.axpcmode.ui.components.ContextMenuState
 import com.android.axion.axpcmode.ui.components.GestureHintBar
 import com.android.axion.axpcmode.ui.components.LocalContextMenuState
+import com.android.axion.axpcmode.ui.components.LocalTargetDisplayId
 import com.android.axion.axpcmode.ui.components.LocalWindowScreenOffset
 import com.android.axion.axpcmode.ui.components.Taskbar
+import com.android.axion.axpcmode.ui.components.taskbar.LocalTaskPeekState
+import com.android.axion.axpcmode.ui.components.taskbar.TaskPeekState
 import com.android.axion.axpcmode.ui.theme.AxPcModeTheme
 import com.android.axion.axpcmode.ui.windows.LocalTaskbarIconRegistry
 import com.android.axion.axpcmode.ui.windows.TaskbarIconRegistry
 import com.android.axion.axpcmode.utils.AppInfo
 import com.android.axion.compose.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.ui.unit.Density
 
 private val pillWidth = 224.dp
 
@@ -55,8 +59,11 @@ class TaskbarViewFactory(
     private val context: Context,
     private val windowHelper: TaskbarWindowManager,
     private val contextMenuState: ContextMenuState,
+    private val peekState: TaskPeekState,
     private val taskbarIconRegistry: TaskbarIconRegistry,
     private val interactor: TaskbarInteractor,
+    private val displayDensityDpi: StateFlow<Int>,
+    private val targetDisplayId: Int = Display.DEFAULT_DISPLAY,
 ) {
 
     fun createTaskbar(
@@ -77,14 +84,14 @@ class TaskbarViewFactory(
                 )
 
             val density = LocalDensity.current
-            val config = LocalConfiguration.current
-            val screenHeight = config.screenHeightDp.dp
-            val yOffsetPx = with(density) { (screenHeight - 56.dp).toPx() }
+            val screenHeightDp = context.resources.displayMetrics.heightPixels / density.density
+            val yOffsetPx = with(density) { (screenHeightDp.dp - 56.dp).toPx() }
 
             CompositionLocalProvider(
                 LocalContextMenuState provides contextMenuState,
                 LocalTaskbarIconRegistry provides taskbarIconRegistry,
                 LocalWindowScreenOffset provides Offset(0f, yOffsetPx),
+                LocalTaskPeekState provides peekState,
             ) {
                 Box(
                     modifier =
@@ -118,7 +125,6 @@ class TaskbarViewFactory(
                         onMediaClick = { interactor.onMediaClick() },
                         onQuickSettingsClick = { interactor.onQuickSettingsClick() },
                         onNotificationClick = { interactor.onNotificationClick() },
-                        modifier = Modifier.height(56.dp),
                     )
                 }
             }
@@ -168,7 +174,20 @@ class TaskbarViewFactory(
                     setViewCompositionStrategy(
                         ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
                     )
-                    setContent { AxPcModeTheme { content() } }
+                    setContent {
+                        val dpi by displayDensityDpi.collectAsState()
+                        val density = if (dpi > 0) {
+                            Density(dpi / 160f)
+                        } else {
+                            LocalDensity.current
+                        }
+                        CompositionLocalProvider(
+                            LocalDensity provides density,
+                            LocalTargetDisplayId provides targetDisplayId,
+                        ) {
+                            AxPcModeTheme { content() }
+                        }
+                    }
                 }
             }
         }

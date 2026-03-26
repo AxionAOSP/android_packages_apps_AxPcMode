@@ -28,6 +28,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -73,18 +74,25 @@ constructor(
     private val _topTaskPackage = MutableStateFlow<String?>(null)
     val topTaskPackage: StateFlow<String?> = _topTaskPackage
 
+    private var collectionJob: Job? = null
+    private var initialized = false
+
     fun init() {
-
-        scope.launch {
-            val allApps = AppUtils.getInstalledApps(context)
-            vm.updateAllApps(allApps)
-            vm.updatePinnedApps(AppUtils.getPinnedApps(context))
-            vm.updateDesktopApps(AppUtils.getDesktopApps(context))
+        if (initialized) {
+            cleanup()
         }
+        initialized = true
 
-        scope.launch { taskMonitor.runningTasks.collect { apps -> vm.updateRunningApps(apps) } }
-
-        scope.launch { taskMonitor.topTaskPackage.collect { pkg -> _topTaskPackage.value = pkg } }
+        collectionJob = scope.launch {
+            launch {
+                val allApps = AppUtils.getInstalledApps(context)
+                vm.updateAllApps(allApps)
+                vm.updatePinnedApps(AppUtils.getPinnedApps(context))
+                vm.updateDesktopApps(AppUtils.getDesktopApps(context))
+            }
+            launch { taskMonitor.runningTasks.collect { apps -> vm.updateRunningApps(apps) } }
+            launch { taskMonitor.topTaskPackage.collect { pkg -> _topTaskPackage.value = pkg } }
+        }
 
         val refreshFilter =
             IntentFilter().apply {
@@ -118,10 +126,14 @@ constructor(
     }
 
     fun cleanup() {
+        collectionJob?.cancel()
+        collectionJob = null
+        initialized = false
+        _topTaskPackage.value = null
 
         try {
             context.unregisterReceiver(refreshReceiver)
             context.unregisterReceiver(packageReceiver)
-        } catch (e: Exception) {}
+        } catch (_: Exception) {}
     }
 }

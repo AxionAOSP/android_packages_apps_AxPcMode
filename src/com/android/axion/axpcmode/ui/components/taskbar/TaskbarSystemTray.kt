@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.axion.axpcmode.ui.components.SignalIcon
 
-private val systemTraySpacing = 10.dp
+private val systemTraySpacing = 6.dp
 
 @Composable
 fun TaskbarSystemTray(
@@ -64,7 +64,7 @@ fun TaskbarSystemTray(
                 Modifier.height(40.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(onClick = onQuickSettingsClick)
-                    .padding(horizontal = systemTraySpacing),
+                    .padding(horizontal = 6.dp),
             contentAlignment = Alignment.Center,
         ) {
             Row(
@@ -155,22 +155,24 @@ fun TaskbarSystemTray(
                     .padding(horizontal = 8.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
+            Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = state.currentTime,
                     style =
-                        MaterialTheme.typography.bodyMedium.copy(
+                        MaterialTheme.typography.bodySmall.copy(
                             fontWeight = FontWeight.Medium,
-                            fontSize = 13.sp,
+                            fontSize = 12.sp,
+                            lineHeight = 14.sp,
                         ),
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = state.currentDate,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                    style =
+                        MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 10.sp,
+                            lineHeight = 12.sp,
+                        ),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                 )
             }

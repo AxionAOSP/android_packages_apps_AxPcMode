@@ -1,7 +1,6 @@
 package com.android.axion.axpcmode.ui.components.taskbar
 
 import android.app.ActivityManager
-import android.app.FreeformLauncher
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -37,16 +36,22 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import kotlinx.coroutines.delay
 import com.android.axion.axpcmode.ui.components.ArrowDirection
 import com.android.axion.axpcmode.ui.components.ContextMenuAction
 import com.android.axion.axpcmode.ui.components.ContextMenuParams
 import com.android.axion.axpcmode.ui.components.LocalContextMenuState
+import com.android.axion.axpcmode.ui.components.LocalTargetDisplayId
 import com.android.axion.axpcmode.ui.components.LocalWindowScreenOffset
 import com.android.axion.axpcmode.ui.windows.LocalTaskbarIconRegistry
 import com.android.axion.axpcmode.utils.AppInfo
@@ -64,6 +69,7 @@ fun TaskbarIcon(
     onClick: () -> Unit,
 ) {
     val launcherContext = LocalContext.current
+    val targetDisplayId = LocalTargetDisplayId.current
     val appIconBitmap = remember(app) { app.icon.toBitmap().asImageBitmap() }
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -80,6 +86,18 @@ fun TaskbarIcon(
     )
 
     val registry = LocalTaskbarIconRegistry.current
+    val peekState = LocalTaskPeekState.current
+    var isHovered by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isHovered, app.taskId) {
+        if (isHovered && app.taskId > 0) {
+            delay(400)
+            val bmp = fetchTaskThumbnail(app.taskId)
+            peekState.show(app, iconCenterLocal.x, bmp)
+        } else if (!isHovered) {
+            peekState.dismiss()
+        }
+    }
 
     val strFloatingWindow = stringResource(R.string.action_floating_window)
     val strClose = stringResource(R.string.action_close_app)
@@ -92,7 +110,7 @@ fun TaskbarIcon(
             buildList {
                 add(
                     ContextMenuAction(label = strFloatingWindow, icon = Icons.Filled.Fullscreen) {
-                        FreeformLauncher.launchDesktopApp(app.packageName, app.className)
+                        AppUtils.launchAppInFreeform(launcherContext, app.packageName, app.className, targetDisplayId)
                     }
                 )
 
@@ -129,7 +147,7 @@ fun TaskbarIcon(
 
                 add(
                     ContextMenuAction(label = strAppInfo, icon = Icons.Filled.Info) {
-                        AppUtils.launchAppInfo(launcherContext, app.packageName)
+                        AppUtils.launchAppInfo(launcherContext, app.packageName, launcherContext.displayId)
                     }
                 )
             }
@@ -155,6 +173,17 @@ fun TaskbarIcon(
         modifier = Modifier
             .fillMaxHeight()
             .width(48.dp)
+            .pointerInput(app.packageName) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Main)
+                        when (event.type) {
+                            PointerEventType.Enter -> isHovered = true
+                            PointerEventType.Exit -> isHovered = false
+                        }
+                    }
+                }
+            }
             .onFocusChanged { isFocused = it.isFocused }
             .onKeyEvent { event ->
                 if (event.type == KeyEventType.KeyDown) {

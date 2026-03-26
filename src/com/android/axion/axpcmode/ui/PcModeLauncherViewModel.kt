@@ -29,6 +29,7 @@ class PcModeLauncherViewModel @Inject constructor() : ViewModel() {
 
     var onRefreshPinnedApps: (() -> Unit)? = null
     var onRefreshDesktopApps: (() -> Unit)? = null
+    var onExitPcMode: (() -> Unit)? = null
 
     private val _showStartMenu = MutableStateFlow(false)
     val showStartMenu: StateFlow<Boolean> = _showStartMenu.asStateFlow()

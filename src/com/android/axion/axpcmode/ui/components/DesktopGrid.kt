@@ -16,7 +16,6 @@
 
 package com.android.axion.axpcmode.ui.components
 
-import android.app.FreeformLauncher
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -109,6 +108,7 @@ fun DesktopAppIcon(
     onAddToTaskbar: () -> Unit,
 ) {
     val launcherContext = LocalContext.current
+    val targetDisplayId = LocalTargetDisplayId.current
     val appIconBitmap = remember(app) { app.icon.toBitmap().asImageBitmap() }
     var isLongPressed by remember { mutableStateOf(false) }
     var isFocused by remember { mutableStateOf(false) }
@@ -155,7 +155,7 @@ fun DesktopAppIcon(
                         label = strFloatingWindow,
                         icon = Icons.Filled.Fullscreen,
                     ) {
-                        FreeformLauncher.launchDesktopApp(app.packageName, app.className)
+                        AppUtils.launchAppInFreeform(launcherContext, app.packageName, app.className, targetDisplayId)
                     },
                     ContextMenuAction(
                         label = strRemoveFromDesktop,
@@ -173,7 +173,7 @@ fun DesktopAppIcon(
                         label = strAppInfo,
                         icon = Icons.Filled.Info,
                     ) {
-                        AppUtils.launchAppInfo(launcherContext, app.packageName)
+                        AppUtils.launchAppInfo(launcherContext, app.packageName, launcherContext.displayId)
                     },
                 ),
             )

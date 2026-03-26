@@ -17,13 +17,20 @@
 package com.android.axion.axpcmode.utils
 
 import android.app.ActivityManager
+import android.os.Handler
+import android.os.Looper
+import com.android.axion.axpcmode.activities.MousePadActivity
+import android.app.ActivityOptions
+import android.app.ActivityTaskManager
 import android.app.FreeformLauncher
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
+import android.view.Display
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -42,8 +49,7 @@ object AppUtils {
     fun getInstalledApps(context: Context): List<AppInfo> {
         val pm = context.packageManager
         val intent = Intent(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) }
-        val apps = pm.queryIntentActivities(intent, 0)
-        return apps
+        return pm.queryIntentActivities(intent, 0)
             .filter { it.activityInfo.packageName != context.packageName }
             .map { resolveInfo ->
                 AppInfo(
@@ -120,20 +126,26 @@ object AppUtils {
         context.sendBroadcast(Intent("REFRESH_DESKTOP_APPS"))
     }
 
-    fun launchApp(context: Context, packageName: String, className: String) {
+    fun launchApp(
+        context: Context,
+        packageName: String,
+        className: String,
+        displayId: Int = Display.DEFAULT_DISPLAY,
+    ) {
+        val opts = makeDisplayOptions(displayId)
         try {
             val intent =
                 Intent().apply {
                     setClassName(packageName, className)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
-            context.startActivity(intent)
+            context.startActivity(intent, opts)
         } catch (e: Exception) {
             try {
                 val intent = context.packageManager.getLaunchIntentForPackage(packageName)
                 intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 if (intent != null) {
-                    context.startActivity(intent)
+                    context.startActivity(intent, opts)
                 }
             } catch (e2: Exception) {
                 Log.e("AppUtils", "Failed to launch app", e2)
@@ -141,31 +153,47 @@ object AppUtils {
         }
     }
 
-    fun launchAppInFreeform(packageName: String, className: String) {
-        try {
+    fun launchAppInFreeform(context: Context, packageName: String, className: String,
+        displayId: Int = Display.DEFAULT_DISPLAY,
+    ) {
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            FreeformLauncher.launchDesktopAppOnDisplay(packageName, className, displayId)
+        } else {
             FreeformLauncher.launchDesktopApp(packageName, className)
-        } catch (e: Exception) {
-            Log.e("AppUtils", "Failed to launch app in freeform", e)
         }
+        Handler(Looper.getMainLooper()).postDelayed({
+            MousePadActivity.cursorBringToFrontCallback?.invoke()
+        }, 300)
     }
 
-    fun launchAppInfo(context: Context, packageName: String) {
+    fun launchAppInfo(
+        context: Context,
+        packageName: String,
+        displayId: Int = Display.DEFAULT_DISPLAY,
+    ) {
         try {
             val intent =
                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                     data = Uri.parse("package:$packageName")
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
-            context.startActivity(intent)
+            context.startActivity(intent, makeDisplayOptions(displayId))
         } catch (e: Exception) {
             Log.e("AppUtils", "Failed to launch app info", e)
         }
     }
 
-    fun getRunningTasks(context: Context): List<AppInfo> {
-        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    private fun makeDisplayOptions(displayId: Int): android.os.Bundle? {
+        if (displayId == Display.DEFAULT_DISPLAY) return null
+        return ActivityOptions.makeBasic().apply {
+            launchDisplayId = displayId
+        }.toBundle()
+    }
+
+    fun getRunningTasks(context: Context, displayId: Int = Display.DEFAULT_DISPLAY): List<AppInfo> {
         val pm = context.packageManager
-        val tasks = am.getRunningTasks(50)
+        val atm = android.app.ActivityTaskManager.getService()
+        val tasks = atm.getTasks(50, false, false, displayId)
 
         return tasks.mapNotNull { task ->
             try {

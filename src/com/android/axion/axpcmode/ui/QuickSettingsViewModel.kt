@@ -25,20 +25,18 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.*
 
 @Singleton
-class QuickSettingsViewModel @Inject constructor(private val repository: QuickSettingsRepository) :
-    ViewModel() {
-
-    val isBtEnabled = repository.isBtEnabled
-    val btDevicesJson = repository.btDevicesJson
+class QuickSettingsViewModel @Inject constructor(
+    private val repository: QuickSettingsRepository,
+) : ViewModel() {
 
     val isAutoBrightness = repository.isAutoBrightness
     val volume = repository.volume
     val maxVolume = repository.maxVolume
-    val wifiScanListJson = repository.wifiScanListJson
+    val wifiScanState = repository.wifiScanState
 
     val qsTiles = repository.qsTiles
 
-    fun clickQSTile(spec: String) = repository.clickQSTile(spec)
+    fun clickQSTile(spec: String) = repository.clickTile(spec)
 
     private val _activeDetailId = MutableStateFlow<String?>(null)
     val activeDetailId = _activeDetailId.asStateFlow()
@@ -76,7 +74,7 @@ class QuickSettingsViewModel @Inject constructor(private val repository: QuickSe
 
     fun toggleEditMode() {
         if (!_isEditMode.value) {
-            repository.queryAvailableTiles()
+            repository.refreshTiles()
         }
         _isEditMode.value = !_isEditMode.value
     }
@@ -85,14 +83,14 @@ class QuickSettingsViewModel @Inject constructor(private val repository: QuickSe
         val current = qsTiles.value.map { it.spec }.toMutableList()
         if (!current.contains(spec)) {
             current.add(spec)
-            repository.updateTiles(current)
+            repository.saveTiles(current)
         }
     }
 
     fun removeTile(spec: String) {
         val current = qsTiles.value.map { it.spec }.toMutableList()
         if (current.remove(spec)) {
-            repository.updateTiles(current)
+            repository.saveTiles(current)
         }
     }
 
@@ -102,23 +100,21 @@ class QuickSettingsViewModel @Inject constructor(private val repository: QuickSe
         val toIndex = current.indexOf(toSpec)
 
         if (fromIndex != -1) {
-
             if (toIndex != -1 && fromIndex != toIndex) {
                 current.removeAt(fromIndex)
                 current.add(toIndex, fromSpec)
-                repository.updateTiles(current)
+                repository.saveTiles(current)
             }
         } else if (toIndex != -1) {
-
             if (!current.contains(fromSpec)) {
                 current.add(toIndex, fromSpec)
-                repository.updateTiles(current)
+                repository.saveTiles(current)
             }
         }
     }
 
     fun saveTiles(specs: List<String>) {
-        repository.updateTiles(specs)
+        repository.saveTiles(specs)
     }
 
     fun updateBrightness(position: Float) {
@@ -177,6 +173,10 @@ class QuickSettingsViewModel @Inject constructor(private val repository: QuickSe
         val normalizedRet = ret.coerceIn(0f, 12f)
         val linear = normalizedRet / 12
         return min + (max - min) * linear
+    }
+
+    fun onCleanup() {
+        repository.onDestroy()
     }
 
     override fun onCleared() {

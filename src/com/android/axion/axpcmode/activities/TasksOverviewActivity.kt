@@ -109,7 +109,9 @@ class TasksOverviewActivity : ComponentActivity() {
         val tasks = mutableListOf<AppInfo>()
 
         try {
-            @Suppress("DEPRECATION") val runningTasks = am.getRunningTasks(20)
+            val targetDisplayId = display?.displayId ?: android.view.Display.DEFAULT_DISPLAY
+            val atm = android.app.ActivityTaskManager.getService()
+            val runningTasks = atm.getTasks(20, false, false, targetDisplayId)
 
             runningTasks.forEach { taskInfo ->
                 val componentName = taskInfo.baseActivity ?: taskInfo.topActivity
@@ -149,16 +151,16 @@ class TasksOverviewActivity : ComponentActivity() {
     }
 
     private fun bringTaskToFront(appInfo: AppInfo) {
+        val displayId = display?.displayId ?: android.view.Display.DEFAULT_DISPLAY
         if (appInfo.taskId != -1) {
             try {
                 val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
                 am.moveTaskToFront(appInfo.taskId, ActivityManager.MOVE_TASK_WITH_HOME)
             } catch (e: Exception) {
-
-                AppUtils.launchApp(this, appInfo.packageName, appInfo.className)
+                AppUtils.launchApp(this, appInfo.packageName, appInfo.className, displayId)
             }
         } else {
-            AppUtils.launchApp(this, appInfo.packageName, appInfo.className)
+            AppUtils.launchApp(this, appInfo.packageName, appInfo.className, displayId)
         }
     }
 
