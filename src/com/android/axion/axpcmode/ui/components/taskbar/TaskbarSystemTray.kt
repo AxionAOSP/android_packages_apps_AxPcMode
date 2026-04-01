@@ -232,7 +232,7 @@ fun TaskbarBatteryIcon(
                 modifier = Modifier.padding(end = 3.5.dp),
             ) {
                 Text(
-                    text = "$level",
+                    text = if (level >= 0) "$level" else "",
                     style =
                         MaterialTheme.typography.labelSmall.copy(
                             fontSize = 9.sp,

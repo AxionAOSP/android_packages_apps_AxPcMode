@@ -131,8 +131,14 @@ class QuickSettingsRepository(
     }
 
     private fun refreshTilesFromState() {
+        val previous = _qsTiles.value.associateBy { it.spec }
         _qsTiles.value = savedSpecs.map { spec ->
-            bundleToTileData(spec, platformRepo.getState(spec))
+            val bundle = platformRepo.getState(spec)
+            if (bundle.isEmpty) {
+                previous[spec] ?: bundleToTileData(spec, bundle)
+            } else {
+                bundleToTileData(spec, bundle)
+            }
         }
     }
 

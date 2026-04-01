@@ -17,6 +17,8 @@
 package com.android.axion.axpcmode.ui.components.taskbar
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.runtime.*
 import com.android.axion.platform.AxPlatformClient
 import com.android.axion.platform.IAxPlatformCallback
@@ -49,7 +51,7 @@ fun rememberTaskbarSystemState(): TaskbarSystemState {
     var isWifiEnabled by remember { mutableStateOf(false) }
     var isBtEnabled by remember { mutableStateOf(false) }
 
-    var batteryLevel by remember { mutableIntStateOf(0) }
+    var batteryLevel by remember { mutableIntStateOf(-1) }
     var isCharging by remember { mutableStateOf(false) }
     var mobileDataLevel by remember { mutableIntStateOf(4) }
     var isMobileDataEnabled by remember { mutableStateOf(false) }
@@ -70,45 +72,48 @@ fun rememberTaskbarSystemState(): TaskbarSystemState {
     }
 
     DisposableEffect(client) {
+        val handler = Handler(Looper.getMainLooper())
         val callback = object : IAxPlatformCallback.Stub() {
             override fun onStateChanged(key: String, state: Bundle) {
-                when (key) {
-                    AxPlatformClient.KEY_BATTERY -> {
-                        batteryLevel = state.getInt("level", 0)
-                        isCharging = state.getBoolean("isCharging", false) ||
-                            state.getBoolean("isPluggedIn", false)
-                    }
-                    AxPlatformClient.FEATURE_MOBILE_DATA -> {
-                        isMobileDataEnabled = state.getBoolean("active", false)
-                        mobileDataLevel = state.getInt("level", 4)
-                        mobileDataType = state.getString("type", "")
-                        isSimPresent = state.getBoolean("available", true)
-                    }
-                    AxPlatformClient.FEATURE_BLUETOOTH -> {
-                        isBtEnabled = state.getBoolean("active", false)
-                        val devices = state.getParcelableArrayList<Bundle>("devices")
-                        var bestLevel = -1
-                        devices?.forEach { dev ->
-                            if (dev.getBoolean("isConnected", false)) {
-                                val level = dev.getInt("batteryLevel", -1)
-                                if (level > -1) {
-                                    bestLevel = level
-                                    return@forEach
+                handler.post {
+                    when (key) {
+                        AxPlatformClient.KEY_BATTERY -> {
+                            batteryLevel = state.getInt("level", 0)
+                            isCharging = state.getBoolean("isCharging", false) ||
+                                state.getBoolean("isPluggedIn", false)
+                        }
+                        AxPlatformClient.FEATURE_MOBILE_DATA -> {
+                            isMobileDataEnabled = state.getBoolean("active", false)
+                            mobileDataLevel = state.getInt("level", 4)
+                            mobileDataType = state.getString("type", "")
+                            isSimPresent = state.getBoolean("available", true)
+                        }
+                        AxPlatformClient.FEATURE_BLUETOOTH -> {
+                            isBtEnabled = state.getBoolean("active", false)
+                            val devices = state.getParcelableArrayList<Bundle>("devices")
+                            var bestLevel = -1
+                            devices?.forEach { dev ->
+                                if (dev.getBoolean("isConnected", false)) {
+                                    val level = dev.getInt("batteryLevel", -1)
+                                    if (level > -1) {
+                                        bestLevel = level
+                                        return@forEach
+                                    }
                                 }
                             }
+                            bluetoothBatteryLevel = bestLevel
                         }
-                        bluetoothBatteryLevel = bestLevel
-                    }
-                    AxPlatformClient.FEATURE_WIFI -> {
-                        isWifiEnabled = state.getBoolean("active", false)
-                        isWifiConnected = state.getBoolean("connected", false)
-                    }
-                    AxPlatformClient.KEY_WIFI_SCAN -> {
-                        val networks = state.getParcelableArrayList<Bundle>("networks")
-                        val connected = networks?.firstOrNull {
-                            it.getBoolean("isConnected", false)
+                        AxPlatformClient.FEATURE_WIFI -> {
+                            isWifiEnabled = state.getBoolean("active", false)
+                            isWifiConnected = state.getBoolean("connected", false)
                         }
-                        wifiLevel = connected?.getInt("level", 0) ?: 0
+                        AxPlatformClient.KEY_WIFI_SCAN -> {
+                            val networks = state.getParcelableArrayList<Bundle>("networks")
+                            val connected = networks?.firstOrNull {
+                                it.getBoolean("isConnected", false)
+                            }
+                            wifiLevel = connected?.getInt("level", 0) ?: 0
+                        }
                     }
                 }
             }
@@ -117,22 +122,30 @@ fun rememberTaskbarSystemState(): TaskbarSystemState {
         client.registerCallback(callback)
 
         val battery = client.getState(AxPlatformClient.KEY_BATTERY)
-        batteryLevel = battery.getInt("level", 0)
-        isCharging = battery.getBoolean("isCharging", false) ||
-            battery.getBoolean("isPluggedIn", false)
+        if (!battery.isEmpty) {
+            batteryLevel = battery.getInt("level", 0)
+            isCharging = battery.getBoolean("isCharging", false) ||
+                battery.getBoolean("isPluggedIn", false)
+        }
 
         val mobile = client.getState(AxPlatformClient.FEATURE_MOBILE_DATA)
-        isMobileDataEnabled = mobile.getBoolean("active", false)
-        mobileDataLevel = mobile.getInt("level", 4)
-        mobileDataType = mobile.getString("type", "")
-        isSimPresent = mobile.getBoolean("available", true)
+        if (!mobile.isEmpty) {
+            isMobileDataEnabled = mobile.getBoolean("active", false)
+            mobileDataLevel = mobile.getInt("level", 4)
+            mobileDataType = mobile.getString("type", "")
+            isSimPresent = mobile.getBoolean("available", true)
+        }
 
         val bt = client.getState(AxPlatformClient.FEATURE_BLUETOOTH)
-        isBtEnabled = bt.getBoolean("active", false)
+        if (!bt.isEmpty) {
+            isBtEnabled = bt.getBoolean("active", false)
+        }
 
         val wifi = client.getState(AxPlatformClient.FEATURE_WIFI)
-        isWifiEnabled = wifi.getBoolean("active", false)
-        isWifiConnected = wifi.getBoolean("connected", false)
+        if (!wifi.isEmpty) {
+            isWifiEnabled = wifi.getBoolean("active", false)
+            isWifiConnected = wifi.getBoolean("connected", false)
+        }
 
         onDispose { client.unregisterCallback(callback) }
     }
