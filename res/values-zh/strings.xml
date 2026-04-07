@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Ax Pc模式</string>
-    <string name="settings">设置</string>
+    <string name="app_name">AxPcMode</string>
+    <string name="settings">設定</string>
     <!-- Settings -->
-    <string name="pc_mode_title">PC 模式</string>
-    <string name="pref_category_general">通用</string>
-    <string name="pref_category_taskbar">任务栏</string>
-    <string name="pref_enable_pc_mode_title">启用 PC 模式</string>
-    <string name="pref_enable_pc_mode_summary">将您的设备转换为桌面式体验</string>
-    <string name="pref_taskbar_timeout_title">自动隐藏超时</string>
-    <string name="pref_taskbar_timeout_summary">任务栏自动隐藏时长</string>
-    <string name="back_button_desc">返回</string>
+    <string name="pc_mode_title">PC Mode</string>
+    <string name="pref_category_general">一般</string>
+    <string name="pref_category_taskbar">Taskbar</string>
+    <string name="pref_enable_pc_mode_title">Enable PC Mode</string>
+    <string name="pref_enable_pc_mode_summary">Transform your device into a desktop-like experience</string>
+    <string name="pref_taskbar_timeout_title">Auto-hide timeout</string>
+    <string name="pref_taskbar_timeout_summary">Duration before taskbar hides automatically</string>
+    <string name="back_button_desc">Back</string>
     <!-- Context Menus -->
-    <string name="action_floating_window">浮动窗口</string>
-    <string name="action_close_app">关闭</string>
-    <string name="action_pin_to_taskbar">置顶到任务栏</string>
-    <string name="action_unpin_from_taskbar">取消置顶任务栏</string>
-    <string name="action_add_to_desktop">添加到桌面</string>
-    <string name="action_remove_from_desktop">从桌面移除</string>
-    <string name="action_app_info">应用信息</string>
+    <string name="action_floating_window">Floating Window</string>
+    <string name="action_close_app">Close</string>
+    <string name="action_pin_to_taskbar">Pin to Taskbar</string>
+    <string name="action_unpin_from_taskbar">Unpin from Taskbar</string>
+    <string name="action_add_to_desktop">Add to Desktop</string>
+    <string name="action_remove_from_desktop">Remove from Desktop</string>
+    <string name="action_app_info">App Info</string>
     <!-- Panels & UI -->
-    <string name="task_overview_no_active_tasks">无活动任务</string>
-    <string name="task_overview_clear_all">清空所有任务</string>
-    <string name="task_overview_close_task_format">关闭 %1$s</string>
-    <string name="desktop_wallpaper_desc">桌面壁纸</string>
-    <string name="search_apps_hint">……搜索应用……</string>
-    <string name="active_tiles">活动磁贴 (拖动以重排/移除)</string>
-    <string name="available_tiles">可用磁贴(拖动或点击以添加)</string>
+    <string name="task_overview_no_active_tasks">No active tasks</string>
+    <string name="task_overview_clear_all">Clear All Tasks</string>
+    <string name="task_overview_close_task_format">Close %1$s</string>
+    <string name="desktop_wallpaper_desc">Desktop Wallpaper</string>
+    <string name="search_apps_hint">Search apps...</string>
+    <string name="active_tiles">Active Tiles (Drag to reorder/remove)</string>
+    <string name="available_tiles">Available Tiles (Drag/Tap to add)</string>
     <string name="drag_tiles_here">拖动磁贴到此处</string>
     <string name="all_tiles_added">已添加所有磁贴</string>
-    <string name="edit_tiles">编辑磁贴</string>
-    <string name="calendar_today">今日</string>
-    <string name="calendar_no_events">无事件</string>
+    <string name="edit_tiles">Edit Tiles</string>
+    <string name="calendar_today">Today</string>
+    <string name="calendar_no_events">No events</string>
 </resources>
