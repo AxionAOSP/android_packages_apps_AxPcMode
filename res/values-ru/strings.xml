@@ -14,21 +14,21 @@
     <!-- Context Menus -->
     <string name="action_floating_window">Плавающее окно</string>
     <string name="action_close_app">Закрыть</string>
-    <string name="action_pin_to_taskbar">Pin to Taskbar</string>
-    <string name="action_unpin_from_taskbar">Unpin from Taskbar</string>
+    <string name="action_pin_to_taskbar">Закрепить на панели задач</string>
+    <string name="action_unpin_from_taskbar">Открепить от панели задач</string>
     <string name="action_add_to_desktop">Добавить на рабочий стол</string>
     <string name="action_remove_from_desktop">Удалить с рабочего стола</string>
     <string name="action_app_info">О приложении</string>
     <!-- Panels & UI -->
     <string name="task_overview_no_active_tasks">Нет активных задач</string>
     <string name="task_overview_clear_all">Очистить все задачи</string>
-    <string name="task_overview_close_task_format">Close %1$s</string>
+    <string name="task_overview_close_task_format">Закрыть %1$s</string>
     <string name="desktop_wallpaper_desc">Обои рабочего стола</string>
-    <string name="search_apps_hint">Поиск приложений…</string>
+    <string name="search_apps_hint">Поиск приложений...</string>
     <string name="active_tiles">Активные плитки (перетащите для сортировки/удаления)</string>
     <string name="available_tiles">Доступные Плитки (перетащите / нажмите, чтобы добавить)</string>
-    <string name="drag_tiles_here">Drag tiles here</string>
-    <string name="all_tiles_added">All tiles added</string>
+    <string name="drag_tiles_here">Перетащите плитки сюда</string>
+    <string name="all_tiles_added">Все плитки добавлены</string>
     <string name="edit_tiles">Редактировать плитку</string>
     <string name="calendar_today">Сегодня</string>
     <string name="calendar_no_events">Нет событий</string>
