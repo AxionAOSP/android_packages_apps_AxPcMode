@@ -73,6 +73,7 @@ abstract class BaseTaskbarService : Service(), TaskbarHost {
     abstract val vm: PcModeLauncherViewModel
     abstract val qsViewModel: QuickSettingsViewModel
     abstract val mediaRepository: MediaRepository
+    abstract val calendarWeatherRepository: CalendarWeatherRepository
     abstract val notificationHelper: TaskbarNotificationHelper
     abstract val appRepository: TaskbarAppRepository
 
@@ -92,6 +93,8 @@ abstract class BaseTaskbarService : Service(), TaskbarHost {
 
         appRepository.init()
 
+        calendarWeatherRepository.start()
+
         panelController = TaskbarPanelController(
             context = this,
             vm = vm,
@@ -99,6 +102,7 @@ abstract class BaseTaskbarService : Service(), TaskbarHost {
             panelOverlayManager = panelOverlayManager,
             qsViewModel = qsViewModel,
             mediaRepository = mediaRepository,
+            calendarWeatherRepository = calendarWeatherRepository,
             contextMenuState = contextMenuState,
             peekState = peekState,
             displayDensityDpi = displayDensityDpi,
@@ -287,6 +291,7 @@ abstract class BaseTaskbarService : Service(), TaskbarHost {
             runCatching { appRepository.cleanup() }
             runCatching { panelOverlayManager.cleanup() }
             runCatching { mediaRepository.onDestroy() }
+            runCatching { calendarWeatherRepository.stop() }
             runCatching { qsViewModel.onCleanup() }
             runCatching { unregisterNotificationListener() }
 

@@ -38,11 +38,13 @@ import androidx.compose.ui.layout.positionOnScreen
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.axion.axpcmode.R
 import com.android.axion.axpcmode.activities.PcModeLauncherActivity
 import com.android.axion.axpcmode.activities.SecondaryPcModeLauncherActivity
 import com.android.axion.axpcmode.activities.TasksOverviewActivity
+import com.android.axion.axpcmode.services.CalendarWeatherRepository
 import com.android.axion.axpcmode.services.MediaRepository
 import com.android.axion.axpcmode.ui.components.*
 import com.android.axion.axpcmode.ui.theme.AxPcModeTheme
@@ -126,6 +128,7 @@ fun OverlayTaskbar(
 fun OverlayStartMenu(
     viewModel: PcModeLauncherViewModel,
     contextMenuState: ContextMenuState,
+    maxGridHeight: Dp = 400.dp,
 ) {
     val context = LocalContext.current
     val displayId = LocalTargetDisplayId.current
@@ -181,6 +184,7 @@ fun OverlayStartMenu(
                         viewModel.dismissAllPanels()
                     },
                     onExitPcMode = { viewModel.onExitPcMode?.invoke() },
+                    maxGridHeight = maxGridHeight,
                     modifier = Modifier.padding(6.dp),
                 )
             }
@@ -215,7 +219,7 @@ fun OverlayQuickSettingsEditor(viewModel: QuickSettingsViewModel) {
 
     AxPcModeTheme {
         Surface(
-            modifier = Modifier.width(800.dp).heightIn(max = safeMaxHeight).padding(12.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(max = safeMaxHeight).padding(12.dp),
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shadowElevation = 8.dp,
@@ -252,7 +256,10 @@ fun OverlayQuickSettingsEditor(viewModel: QuickSettingsViewModel) {
 }
 
 @Composable
-fun OverlayNotificationPanel(viewModel: PcModeLauncherViewModel) {
+fun OverlayNotificationPanel(
+    viewModel: PcModeLauncherViewModel,
+    calendarWeatherRepository: CalendarWeatherRepository,
+) {
     AxPcModeTheme {
         Box(
             contentAlignment = Alignment.BottomEnd,
@@ -260,7 +267,16 @@ fun OverlayNotificationPanel(viewModel: PcModeLauncherViewModel) {
                 WindowInsets.displayCutout.only(WindowInsetsSides.End)
             ),
         ) {
-            NotificationPanel(modifier = Modifier.padding(top = 6.dp, bottom = 6.dp, end = 12.dp))
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.padding(top = 6.dp, bottom = 6.dp, end = 12.dp),
+            ) {
+                CalendarWeatherPanel(
+                    repository = calendarWeatherRepository,
+                    modifier = Modifier.padding(end = 8.dp),
+                )
+                NotificationPanel()
+            }
         }
     }
 }

@@ -19,6 +19,7 @@ package com.android.axion.axpcmode.ui.components.taskbar
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,6 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,10 +47,24 @@ private val PEEK_THUMBNAIL_HEIGHT = 140.dp
 fun TaskPeekCard(
     app: AppInfo,
     thumbnail: Bitmap?,
+    peekState: TaskPeekState,
+    onLaunch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.width(PEEK_WIDTH),
+        modifier = modifier
+            .width(PEEK_WIDTH)
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Main)
+                        when (event.type) {
+                            PointerEventType.Enter -> peekState.enterCard()
+                            PointerEventType.Exit -> peekState.leaveCard()
+                        }
+                    }
+                }
+            },
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceContainer,
         shadowElevation = 12.dp,
@@ -78,7 +96,8 @@ fun TaskPeekCard(
                     .height(PEEK_THUMBNAIL_HEIGHT)
                     .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
                     .clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest),
+                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                    .clickable { onLaunch() },
                 contentAlignment = Alignment.Center,
             ) {
                 if (thumbnail != null) {

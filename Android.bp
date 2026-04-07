@@ -52,8 +52,10 @@ android_app {
         "gson-prebuilt-jar-2.9.1",
         "ax_compose",
         "ax_platform_hooks",
+        "PlatformComposeSceneTransitionLayout",
         "androidx.palette_palette",
         "hilt_android",
+        "axquicklook-client",
     ],
 
     kotlincflags: [

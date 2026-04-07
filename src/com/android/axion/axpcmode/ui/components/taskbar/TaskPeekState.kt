@@ -21,7 +21,12 @@ import android.graphics.Bitmap
 import android.hardware.HardwareBuffer
 import androidx.compose.runtime.*
 import com.android.axion.axpcmode.utils.AppInfo
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TaskPeekState {
@@ -31,16 +36,42 @@ class TaskPeekState {
         private set
     var anchorXPx by mutableFloatStateOf(0f)
         private set
+    var isCardHovered by mutableStateOf(false)
+        private set
+
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var dismissJob: Job? = null
 
     fun show(app: AppInfo, x: Float, bmp: Bitmap?) {
+        dismissJob?.cancel()
         peekedApp = app
         anchorXPx = x
         thumbnail = bmp
     }
 
+    fun enterCard() {
+        dismissJob?.cancel()
+        isCardHovered = true
+    }
+
+    fun leaveCard() {
+        isCardHovered = false
+        scheduleDismiss()
+    }
+
+    fun scheduleDismiss() {
+        dismissJob?.cancel()
+        dismissJob = scope.launch {
+            delay(150)
+            dismiss()
+        }
+    }
+
     fun dismiss() {
+        dismissJob?.cancel()
         peekedApp = null
         thumbnail = null
+        isCardHovered = false
     }
 }
 

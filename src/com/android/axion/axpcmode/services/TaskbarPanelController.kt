@@ -23,6 +23,7 @@ import android.view.Display
 import android.view.Gravity
 import android.view.WindowManager
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.unit.dp
 import com.android.axion.axpcmode.ui.OverlayContextMenu
 import com.android.axion.axpcmode.ui.OverlayMediaPlayer
 import com.android.axion.axpcmode.ui.OverlayNotificationPanel
@@ -34,6 +35,7 @@ import com.android.axion.axpcmode.ui.PcModeLauncherViewModel
 import com.android.axion.axpcmode.ui.QuickSettingsViewModel
 import com.android.axion.axpcmode.ui.components.ContextMenuState
 import com.android.axion.axpcmode.ui.components.taskbar.TaskPeekCard
+import com.android.axion.axpcmode.utils.AppUtils
 import com.android.axion.axpcmode.ui.components.taskbar.TaskPeekState
 import com.android.axion.axpcmode.ui.theme.AxPcModeTheme
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +50,7 @@ class TaskbarPanelController(
     private val panelOverlayManager: PanelOverlayManager,
     private val qsViewModel: QuickSettingsViewModel,
     private val mediaRepository: MediaRepository,
+    private val calendarWeatherRepository: CalendarWeatherRepository,
     private val contextMenuState: ContextMenuState,
     private val peekState: TaskPeekState,
     private val displayDensityDpi: StateFlow<Int>,
@@ -80,17 +83,25 @@ class TaskbarPanelController(
         val panelPaddingPx = (12 * density).toInt()
         val maxPanelHeightPx = screenHeightPx - taskbarYOffsetPx - panelPaddingPx
 
-        val startMenuMaxWidthDp = (screenWidthDp * 0.55f).coerceIn(360f, 720f)
+        val startMenuMaxWidthDp = (screenWidthDp * 0.65f).coerceIn(420f, 860f)
         val startMenuMaxWidthPx = (startMenuMaxWidthDp * density).toInt()
 
-        val qsEditorWidthPx = ((screenWidthDp * 0.55f).coerceIn(400f, 800f) * density).toInt()
+        val startMenuGridOverheadPx = (170 * density).toInt()
+        val startMenuGridMaxHeightDp = when {
+            screenHeightPx >= 2160 -> 600f
+            screenHeightPx >= 1440 -> 460f
+            screenHeightPx >= 1080 -> 360f
+            else -> 280f
+        }.coerceAtMost((maxPanelHeightPx - startMenuGridOverheadPx) / density)
+
+        val qsEditorWidthPx = (849 * density).toInt()
 
         scope.launch {
             vm.showStartMenu.collect { show ->
                 if (show) {
                     panelOverlayManager.show(
                         id = "start_menu",
-                        content = { OverlayStartMenu(vm, contextMenuState) },
+                        content = { OverlayStartMenu(vm, contextMenuState, startMenuGridMaxHeightDp.dp) },
                         gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL,
                         width = startMenuMaxWidthPx,
                         height = WindowManager.LayoutParams.WRAP_CONTENT,
@@ -150,7 +161,7 @@ class TaskbarPanelController(
                 if (show) {
                     panelOverlayManager.show(
                         id = "notifications",
-                        content = { OverlayNotificationPanel(vm) },
+                        content = { OverlayNotificationPanel(vm, calendarWeatherRepository) },
                         gravity = Gravity.BOTTOM or Gravity.END,
                         width = WindowManager.LayoutParams.WRAP_CONTENT,
                         height = WindowManager.LayoutParams.WRAP_CONTENT,
@@ -216,6 +227,11 @@ class TaskbarPanelController(
                                     TaskPeekCard(
                                         app = app,
                                         thumbnail = peekState.thumbnail,
+                                        peekState = peekState,
+                                        onLaunch = {
+                                            AppUtils.launchApp(context, app.packageName, app.className, targetDisplayId)
+                                            peekState.dismiss()
+                                        },
                                     )
                                 }
                             },

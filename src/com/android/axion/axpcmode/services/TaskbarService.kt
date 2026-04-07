@@ -56,6 +56,7 @@ class TaskbarService : Hilt_TaskbarService() {
     @Inject override lateinit var vm: PcModeLauncherViewModel
     @Inject override lateinit var qsViewModel: QuickSettingsViewModel
     @Inject override lateinit var mediaRepository: MediaRepository
+    @Inject override lateinit var calendarWeatherRepository: CalendarWeatherRepository
     @Inject override lateinit var notificationHelper: TaskbarNotificationHelper
     @Inject override lateinit var appRepository: TaskbarAppRepository
 

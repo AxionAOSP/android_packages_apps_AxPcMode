@@ -18,6 +18,7 @@ package com.android.axion.axpcmode.di
 
 import android.content.Context
 import com.android.axion.axpcmode.services.AxPlatformRepository
+import com.android.axion.axpcmode.services.CalendarWeatherRepository
 import com.android.axion.axpcmode.services.MediaRepository
 import com.android.axion.axpcmode.services.QuickSettingsRepository
 import com.android.axion.axpcmode.services.TaskbarNotificationHelper
@@ -66,6 +67,12 @@ object AxPcModeModule {
     @Singleton
     fun provideMediaRepository(@ApplicationContext context: Context): MediaRepository =
         MediaRepository(context)
+
+    @Provides
+    @Singleton
+    fun provideCalendarWeatherRepository(
+        @ApplicationContext context: Context
+    ): CalendarWeatherRepository = CalendarWeatherRepository(context)
 
     @Provides
     @Singleton

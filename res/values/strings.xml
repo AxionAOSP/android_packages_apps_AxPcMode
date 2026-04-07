@@ -33,5 +33,7 @@
     <string name="drag_tiles_here">Drag tiles here</string>
     <string name="all_tiles_added">All tiles added</string>
     <string name="edit_tiles">Edit Tiles</string>
+    <string name="calendar_today">Today</string>
+    <string name="calendar_no_events">No events</string>
 
 </resources>

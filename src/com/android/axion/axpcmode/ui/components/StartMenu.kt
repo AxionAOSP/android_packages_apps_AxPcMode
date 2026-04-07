@@ -71,13 +71,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.axion.axpcmode.utils.AppInfo
 import com.android.axion.axpcmode.utils.AppUtils
 import com.android.axion.axpcmode.R
-
-private val MAX_GRID_HEIGHT = 400.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,6 +89,7 @@ fun StartMenu(
     onRemoveFromDesktop: (AppInfo) -> Unit,
     onAddToTaskbar: (AppInfo) -> Unit,
     onExitPcMode: () -> Unit,
+    maxGridHeight: Dp = 400.dp,
     modifier: Modifier = Modifier,
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -126,7 +126,7 @@ fun StartMenu(
                 modifier = Modifier
                     .weight(1f, fill = false)
                     .fillMaxWidth()
-                    .heightIn(max = MAX_GRID_HEIGHT)
+                    .heightIn(max = maxGridHeight)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {

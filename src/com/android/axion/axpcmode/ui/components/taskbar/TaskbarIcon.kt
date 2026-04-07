@@ -95,7 +95,7 @@ fun TaskbarIcon(
             val bmp = fetchTaskThumbnail(app.taskId)
             peekState.show(app, iconCenterLocal.x, bmp)
         } else if (!isHovered) {
-            peekState.dismiss()
+            peekState.scheduleDismiss()
         }
     }
 
