@@ -24,7 +24,7 @@
     <string name="task_overview_clear_all">Clear All Tasks</string>
     <string name="task_overview_close_task_format">Close %1$s</string>
     <string name="desktop_wallpaper_desc">Desktop Wallpaper</string>
-    <string name="search_apps_hint">Search apps...</string>
+    <string name="search_apps_hint">搜尋應用程式...</string>
     <string name="active_tiles">Active Tiles (Drag to reorder/remove)</string>
     <string name="available_tiles">Available Tiles (Drag/Tap to add)</string>
     <string name="drag_tiles_here">拖动磁贴到此处</string>
