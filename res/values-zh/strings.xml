@@ -3,33 +3,33 @@
     <string name="app_name">AxPcMode</string>
     <string name="settings">設定</string>
     <!-- Settings -->
-    <string name="pc_mode_title">PC Mode</string>
+    <string name="pc_mode_title">PC 模式</string>
     <string name="pref_category_general">一般</string>
-    <string name="pref_category_taskbar">Taskbar</string>
-    <string name="pref_enable_pc_mode_title">Enable PC Mode</string>
-    <string name="pref_enable_pc_mode_summary">Transform your device into a desktop-like experience</string>
-    <string name="pref_taskbar_timeout_title">Auto-hide timeout</string>
-    <string name="pref_taskbar_timeout_summary">Duration before taskbar hides automatically</string>
+    <string name="pref_category_taskbar">工作列</string>
+    <string name="pref_enable_pc_mode_title">啟用 PC 模式</string>
+    <string name="pref_enable_pc_mode_summary">讓你的裝置化身桌面環境</string>
+    <string name="pref_taskbar_timeout_title">自動隱藏逾時</string>
+    <string name="pref_taskbar_timeout_summary">工作列自動隱藏前的等待時間</string>
     <string name="back_button_desc">Back</string>
     <!-- Context Menus -->
-    <string name="action_floating_window">Floating Window</string>
+    <string name="action_floating_window">懸浮視窗</string>
     <string name="action_close_app">Close</string>
     <string name="action_pin_to_taskbar">Pin to Taskbar</string>
     <string name="action_unpin_from_taskbar">Unpin from Taskbar</string>
-    <string name="action_add_to_desktop">Add to Desktop</string>
-    <string name="action_remove_from_desktop">Remove from Desktop</string>
-    <string name="action_app_info">App Info</string>
+    <string name="action_add_to_desktop">新增至桌面</string>
+    <string name="action_remove_from_desktop">從桌面移除</string>
+    <string name="action_app_info">應用程式資訊</string>
     <!-- Panels & UI -->
-    <string name="task_overview_no_active_tasks">No active tasks</string>
-    <string name="task_overview_clear_all">Clear All Tasks</string>
+    <string name="task_overview_no_active_tasks">沒有進行中的工作</string>
+    <string name="task_overview_clear_all">清除所有工作</string>
     <string name="task_overview_close_task_format">Close %1$s</string>
-    <string name="desktop_wallpaper_desc">Desktop Wallpaper</string>
+    <string name="desktop_wallpaper_desc">桌面桌布</string>
     <string name="search_apps_hint">搜尋應用程式...</string>
-    <string name="active_tiles">Active Tiles (Drag to reorder/remove)</string>
-    <string name="available_tiles">Available Tiles (Drag/Tap to add)</string>
+    <string name="active_tiles">使用中的方塊（拖曳以重新排序/移除）</string>
+    <string name="available_tiles">可用方塊（拖曳/輕觸以新增）</string>
     <string name="drag_tiles_here">拖动磁贴到此处</string>
     <string name="all_tiles_added">已添加所有磁贴</string>
     <string name="edit_tiles">Edit Tiles</string>
-    <string name="calendar_today">Today</string>
-    <string name="calendar_no_events">No events</string>
+    <string name="calendar_today">今天</string>
+    <string name="calendar_no_events">沒有活動</string>
 </resources>
