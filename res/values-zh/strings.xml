@@ -10,7 +10,7 @@
     <string name="pref_enable_pc_mode_summary">讓你的裝置化身桌面環境</string>
     <string name="pref_taskbar_timeout_title">自動隱藏逾時</string>
     <string name="pref_taskbar_timeout_summary">工作列自動隱藏前的等待時間</string>
-    <string name="back_button_desc">Back</string>
+    <string name="back_button_desc">返回</string>
     <!-- Context Menus -->
     <string name="action_floating_window">懸浮視窗</string>
     <string name="action_close_app">關閉</string>
