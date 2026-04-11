@@ -17,9 +17,7 @@
 package com.android.axion.axpcmode.ui.components
 
 import android.app.WallpaperManager
-import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -29,29 +27,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.drawable.toBitmap
 
 @Composable
 fun DesktopWallpaper() {
     val context = LocalContext.current
-    val configuration = LocalConfiguration.current
     var wallpaperBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-    LaunchedEffect(isLandscape) {
+    LaunchedEffect(Unit) {
         val wallpaperManager = WallpaperManager.getInstance(context)
         val drawable = wallpaperManager.drawable
         if (drawable != null) {
-            val bitmap = drawable.toBitmap()
-            wallpaperBitmap = if (isLandscape && bitmap.height > bitmap.width) {
-                val matrix = Matrix().apply { postRotate(90f) }
-                Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-            } else {
-                bitmap
-            }
+            wallpaperBitmap = drawable.toBitmap()
         }
     }
 
