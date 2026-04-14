@@ -83,16 +83,25 @@ class TaskbarPanelController(
         val panelPaddingPx = (12 * density).toInt()
         val maxPanelHeightPx = screenHeightPx - taskbarYOffsetPx - panelPaddingPx
 
-        val startMenuMaxWidthDp = (screenWidthDp * 0.65f).coerceIn(420f, 860f)
+        val screenHeightDp = screenHeightPx / density
+        val aspectRatio = screenWidthDp / screenHeightDp.coerceAtLeast(1f)
+        val startMenuWidthRatio = when {
+            aspectRatio >= 1.9f -> 0.78f
+            aspectRatio >= 1.4f -> 0.68f
+            else -> 0.86f
+        }
+        val startMenuMaxWidthDp = (screenWidthDp * startMenuWidthRatio).coerceIn(440f, 920f)
         val startMenuMaxWidthPx = (startMenuMaxWidthDp * density).toInt()
 
-        val startMenuGridOverheadPx = (170 * density).toInt()
+        val startMenuGridOverheadDp = 196f
+        val startMenuGridBudgetDp = (maxPanelHeightPx / density - startMenuGridOverheadDp)
+            .coerceAtLeast(160f)
         val startMenuGridMaxHeightDp = when {
-            screenHeightPx >= 2160 -> 600f
-            screenHeightPx >= 1440 -> 460f
-            screenHeightPx >= 1080 -> 360f
+            screenHeightDp >= 900f -> 600f
+            screenHeightDp >= 700f -> 480f
+            screenHeightDp >= 520f -> 380f
             else -> 280f
-        }.coerceAtMost((maxPanelHeightPx - startMenuGridOverheadPx) / density)
+        }.coerceAtMost(startMenuGridBudgetDp)
 
         val qsEditorWidthPx = (849 * density).toInt()
 

@@ -112,6 +112,12 @@ fun StartMenu(
         } catch (e: Exception) {}
     }
 
+    val configuration = LocalConfiguration.current
+    val liveScreenHeight = configuration.screenHeightDp.dp
+    val panelChromeHeight = 196.dp
+    val screenSafeGridHeight = (liveScreenHeight - panelChromeHeight).coerceAtLeast(160.dp)
+    val effectiveMaxGridHeight = minOf(maxGridHeight, screenSafeGridHeight)
+
     Surface(
         modifier =
             modifier
@@ -122,42 +128,47 @@ fun StartMenu(
         shadowElevation = 8.dp,
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Column(
-                modifier = Modifier
-                    .weight(1f, fill = false)
-                    .fillMaxWidth()
-                    .heightIn(max = maxGridHeight)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                val chunkSize = 5
-                val chunkedApps = filteredApps.chunked(chunkSize)
-                
-                chunkedApps.forEach { rowApps ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        rowApps.forEach { app ->
-                            Box(
-                                modifier = Modifier.weight(1f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                val isPinned = pinnedApps.any { it.packageName == app.packageName }
-                                val isOnDesktop = desktopApps.any { it.packageName == app.packageName }
-                                StartMenuAppItem(
-                                    app = app,
-                                    isPinned = isPinned,
-                                    isOnDesktop = isOnDesktop,
-                                    onClick = { onAppClick(app) },
-                                    onAddToDesktop = { onAddToDesktop(app) },
-                                    onRemoveFromDesktop = { onRemoveFromDesktop(app) },
-                                    onAddToTaskbar = { onAddToTaskbar(app) },
-                                )
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val cellWidth = 80.dp
+                val cellSpacing = 8.dp
+                val chunkSize = ((maxWidth + cellSpacing) / (cellWidth + cellSpacing))
+                    .toInt()
+                    .coerceIn(4, 10)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = effectiveMaxGridHeight)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    val chunkedApps = filteredApps.chunked(chunkSize)
+
+                    chunkedApps.forEach { rowApps ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(cellSpacing),
+                        ) {
+                            rowApps.forEach { app ->
+                                Box(
+                                    modifier = Modifier.weight(1f),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    val isPinned = pinnedApps.any { it.packageName == app.packageName }
+                                    val isOnDesktop = desktopApps.any { it.packageName == app.packageName }
+                                    StartMenuAppItem(
+                                        app = app,
+                                        isPinned = isPinned,
+                                        isOnDesktop = isOnDesktop,
+                                        onClick = { onAppClick(app) },
+                                        onAddToDesktop = { onAddToDesktop(app) },
+                                        onRemoveFromDesktop = { onRemoveFromDesktop(app) },
+                                        onAddToTaskbar = { onAddToTaskbar(app) },
+                                    )
+                                }
                             }
-                        }
-                        repeat(chunkSize - rowApps.size) {
-                            Spacer(modifier = Modifier.weight(1f))
+                            repeat(chunkSize - rowApps.size) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
                     }
                 }
