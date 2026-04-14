@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AxPc模式</string>
+    <string name="settings">设置</string>
+
+    <!-- Settings -->
+    <string name="pc_mode_title">PC模式</string>
+    <string name="pref_category_general">通用</string>
+    <string name="pref_category_taskbar">任务栏</string>
+    <string name="pref_enable_pc_mode_title">启用PC模式</string>
+    <string name="pref_enable_pc_mode_summary">将设备转变为类似桌面的体验</string>
+    <string name="pref_taskbar_timeout_title">自动隐藏超时</string>
+    <string name="pref_taskbar_timeout_summary">任务栏自动隐藏前的持续时间</string>
+    <string name="back_button_desc">返回</string>
+
+    <!-- Context Menus -->
+    <string name="action_floating_window">浮动窗口</string>
+    <string name="action_close_app">关闭</string>
+    <string name="action_pin_to_taskbar">固定到任务栏</string>
+    <string name="action_unpin_from_taskbar">从任务栏取消固定</string>
+    <string name="action_add_to_desktop">添加到桌面</string>
+    <string name="action_remove_from_desktop">从桌面移除</string>
+    <string name="action_app_info">应用信息</string>
+
+    <!-- Panels & UI -->
+    <string name="task_overview_no_active_tasks">无活动任务</string>
+    <string name="task_overview_clear_all">清除所有任务</string>
+    <string name="task_overview_close_task_format">关闭 %1$s</string>
+    <string name="desktop_wallpaper_desc">桌面壁纸</string>
+    <string name="search_apps_hint">搜索应用…</string>
+    <string name="active_tiles">活动磁贴（拖动以重新排序/移除）</string>
+    <string name="available_tiles">可用磁贴（拖动/点击以添加）</string>
+    <string name="drag_tiles_here">将磁贴拖到这里</string>
+    <string name="all_tiles_added">所有磁贴已添加</string>
+    <string name="edit_tiles">编辑磁贴</string>
+    <string name="calendar_today">今天</string>
+    <string name="calendar_no_events">无事件</string>
+
+</resources>
