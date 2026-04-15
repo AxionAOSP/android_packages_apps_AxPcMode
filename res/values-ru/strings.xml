@@ -3,13 +3,13 @@
     <string name="app_name">AxPcMode</string>
     <string name="settings">Настройки</string>
     <!-- Settings -->
-    <string name="pc_mode_title">PC Mode</string>
+    <string name="pc_mode_title">Режим компьютера</string>
     <string name="pref_category_general">Общие</string>
-    <string name="pref_category_taskbar">Taskbar</string>
-    <string name="pref_enable_pc_mode_title">Enable PC Mode</string>
+    <string name="pref_category_taskbar">Панель задач</string>
+    <string name="pref_enable_pc_mode_title">Включить режим ПК</string>
     <string name="pref_enable_pc_mode_summary">Превратите ваше устройство в подобие настольного компьютера</string>
-    <string name="pref_taskbar_timeout_title">Auto-hide timeout</string>
-    <string name="pref_taskbar_timeout_summary">Duration before taskbar hides automatically</string>
+    <string name="pref_taskbar_timeout_title">Автоматически скрывать таймаут</string>
+    <string name="pref_taskbar_timeout_summary">Продолжительность перед автоматическим скрытием панели задач</string>
     <string name="back_button_desc">Назад</string>
     <!-- Context Menus -->
     <string name="action_floating_window">Плавающее окно</string>
