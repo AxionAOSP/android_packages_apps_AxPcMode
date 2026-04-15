@@ -3,13 +3,13 @@
     <string name="app_name">AxPcMode</string>
     <string name="settings">Ayarlar</string>
     <!-- Settings -->
-    <string name="pc_mode_title">PC Mode</string>
+    <string name="pc_mode_title">PC Modu</string>
     <string name="pref_category_general">Genel</string>
-    <string name="pref_category_taskbar">Taskbar</string>
-    <string name="pref_enable_pc_mode_title">Enable PC Mode</string>
+    <string name="pref_category_taskbar">Görev çubuğu</string>
+    <string name="pref_enable_pc_mode_title">PC Modunu Etkinleştir</string>
     <string name="pref_enable_pc_mode_summary">Transform your device into a desktop-like experience</string>
-    <string name="pref_taskbar_timeout_title">Auto-hide timeout</string>
-    <string name="pref_taskbar_timeout_summary">Duration before taskbar hides automatically</string>
+    <string name="pref_taskbar_timeout_title">Otomatik gizleme zaman aşımı</string>
+    <string name="pref_taskbar_timeout_summary">Görev çubuğu otomatik olarak gizlenmeden önceki süre</string>
     <string name="back_button_desc">Geri</string>
     <!-- Context Menus -->
     <string name="action_floating_window">Floating Window</string>
