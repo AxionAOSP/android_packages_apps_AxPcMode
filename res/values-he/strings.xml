@@ -10,7 +10,7 @@
     <string name="pref_enable_pc_mode_summary">Transform your device into a desktop-like experience</string>
     <string name="pref_taskbar_timeout_title">Auto-hide timeout</string>
     <string name="pref_taskbar_timeout_summary">Duration before taskbar hides automatically</string>
-    <string name="back_button_desc">Back</string>
+    <string name="back_button_desc">חזרה</string>
     <!-- Context Menus -->
     <string name="action_floating_window">Floating Window</string>
     <string name="action_close_app">Close</string>
