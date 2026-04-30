@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AxPcMode</string>
-    <string name="settings">Settings</string>
+    <string name="settings">הגדרות</string>
     <!-- Settings -->
     <string name="pc_mode_title">PC Mode</string>
     <string name="pref_category_general">General</string>
@@ -14,15 +14,15 @@
     <!-- Context Menus -->
     <string name="action_floating_window">Floating Window</string>
     <string name="action_close_app">Close</string>
-    <string name="action_pin_to_taskbar">Pin to Taskbar</string>
-    <string name="action_unpin_from_taskbar">Unpin from Taskbar</string>
+    <string name="action_pin_to_taskbar">הצמדה לשורת המשימות</string>
+    <string name="action_unpin_from_taskbar">ביטול הצמדה לשורת המשימות</string>
     <string name="action_add_to_desktop">Add to Desktop</string>
     <string name="action_remove_from_desktop">Remove from Desktop</string>
     <string name="action_app_info">App Info</string>
     <!-- Panels & UI -->
     <string name="task_overview_no_active_tasks">No active tasks</string>
     <string name="task_overview_clear_all">Clear All Tasks</string>
-    <string name="task_overview_close_task_format">Close %1$s</string>
+    <string name="task_overview_close_task_format">סגירת %1$s</string>
     <string name="desktop_wallpaper_desc">Desktop Wallpaper</string>
     <string name="search_apps_hint">Search apps...</string>
     <string name="active_tiles">Active Tiles (Drag to reorder/remove)</string>
