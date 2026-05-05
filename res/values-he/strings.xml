@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AxPcMode</string>
-    <string name="settings">Settings</string>
+    <string name="settings">הגדרות</string>
     <!-- Settings -->
     <string name="pc_mode_title">PC Mode</string>
-    <string name="pref_category_general">General</string>
+    <string name="pref_category_general">כללי</string>
     <string name="pref_category_taskbar">Taskbar</string>
     <string name="pref_enable_pc_mode_title">Enable PC Mode</string>
     <string name="pref_enable_pc_mode_summary">Transform your device into a desktop-like experience</string>
     <string name="pref_taskbar_timeout_title">Auto-hide timeout</string>
     <string name="pref_taskbar_timeout_summary">Duration before taskbar hides automatically</string>
-    <string name="back_button_desc">Back</string>
+    <string name="back_button_desc">חזרה</string>
     <!-- Context Menus -->
-    <string name="action_floating_window">Floating Window</string>
+    <string name="action_floating_window">חלון צף</string>
     <string name="action_close_app">Close</string>
-    <string name="action_pin_to_taskbar">Pin to Taskbar</string>
-    <string name="action_unpin_from_taskbar">Unpin from Taskbar</string>
-    <string name="action_add_to_desktop">Add to Desktop</string>
-    <string name="action_remove_from_desktop">Remove from Desktop</string>
-    <string name="action_app_info">App Info</string>
+    <string name="action_pin_to_taskbar">הצמדה לשורת המשימות</string>
+    <string name="action_unpin_from_taskbar">ביטול הצמדה לשורת המשימות</string>
+    <string name="action_add_to_desktop">הוספה לשולחן העבודה</string>
+    <string name="action_remove_from_desktop">הסרה משולחן העבודה</string>
+    <string name="action_app_info">פרטי אפליקציה</string>
     <!-- Panels & UI -->
-    <string name="task_overview_no_active_tasks">No active tasks</string>
-    <string name="task_overview_clear_all">Clear All Tasks</string>
-    <string name="task_overview_close_task_format">Close %1$s</string>
+    <string name="task_overview_no_active_tasks">אין משימות פעילות</string>
+    <string name="task_overview_clear_all">ניקוי כל המשימות</string>
+    <string name="task_overview_close_task_format">סגירת %1$s</string>
     <string name="desktop_wallpaper_desc">Desktop Wallpaper</string>
     <string name="search_apps_hint">Search apps...</string>
     <string name="active_tiles">Active Tiles (Drag to reorder/remove)</string>
@@ -30,6 +30,6 @@
     <string name="drag_tiles_here">Drag tiles here</string>
     <string name="all_tiles_added">All tiles added</string>
     <string name="edit_tiles">Edit Tiles</string>
-    <string name="calendar_today">Today</string>
-    <string name="calendar_no_events">No events</string>
+    <string name="calendar_today">היום</string>
+    <string name="calendar_no_events">אין אירועים</string>
 </resources>
