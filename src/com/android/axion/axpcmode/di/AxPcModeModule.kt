@@ -19,6 +19,7 @@ package com.android.axion.axpcmode.di
 import android.content.Context
 import com.android.axion.axpcmode.services.AxPlatformRepository
 import com.android.axion.axpcmode.services.CalendarWeatherRepository
+import com.android.axion.axpcmode.services.DesktopWallpaperRepository
 import com.android.axion.axpcmode.services.MediaRepository
 import com.android.axion.axpcmode.services.QuickSettingsRepository
 import com.android.axion.axpcmode.services.TaskbarNotificationHelper
@@ -90,4 +91,11 @@ object AxPcModeModule {
     @Provides @Background fun provideBackgroundDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
     @Provides @Main fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
+
+    @Provides
+    @Singleton
+    fun provideDesktopWallpaperRepository(
+        @ApplicationContext context: Context,
+        @IoScope scope: CoroutineScope,
+    ): DesktopWallpaperRepository = DesktopWallpaperRepository(context, scope)
 }

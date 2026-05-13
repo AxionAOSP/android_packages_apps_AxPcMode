@@ -51,7 +51,9 @@ class SecondaryPcModeLauncherActivity : Hilt_SecondaryPcModeLauncherActivity() {
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {}
+                override fun handleOnBackPressed() {
+                    viewModel.closeWallpaperSettingsIfOpen()
+                }
             },
         )
 

@@ -73,6 +73,8 @@ class TaskbarInteractor(
     }
 
     fun onHomeClick() {
+        if (viewModel.closeWallpaperSettingsIfOpen()) return
+
         try {
             val activityClass = if (targetDisplayId != Display.DEFAULT_DISPLAY)
                 SecondaryPcModeLauncherActivity::class.java
@@ -90,6 +92,8 @@ class TaskbarInteractor(
     }
 
     fun onBackClick() {
+        if (viewModel.closeWallpaperSettingsIfOpen()) return
+
         try {
             val now = SystemClock.uptimeMillis()
             val down = KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK, 0, 0,

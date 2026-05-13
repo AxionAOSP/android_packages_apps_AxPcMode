@@ -16,7 +16,10 @@
 
 package com.android.axion.axpcmode.ui
 
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.lifecycle.ViewModel
+import com.android.axion.axpcmode.services.DesktopWallpaperRepository
 import com.android.axion.axpcmode.utils.AppInfo
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,7 +28,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 @Singleton
-class PcModeLauncherViewModel @Inject constructor() : ViewModel() {
+class PcModeLauncherViewModel @Inject constructor(
+    private val wallpaperRepo: DesktopWallpaperRepository,
+) : ViewModel() {
 
     var onRefreshPinnedApps: (() -> Unit)? = null
     var onRefreshDesktopApps: (() -> Unit)? = null
@@ -48,6 +53,13 @@ class PcModeLauncherViewModel @Inject constructor() : ViewModel() {
 
     private val _isAxionPcModeFocused = MutableStateFlow(true)
     val isAxionPcModeFocused: StateFlow<Boolean> = _isAxionPcModeFocused.asStateFlow()
+
+    private val _showWallpaperSettings = MutableStateFlow(false)
+    val showWallpaperSettings: StateFlow<Boolean> = _showWallpaperSettings.asStateFlow()
+
+    val wallpaperBitmap: StateFlow<Bitmap?> = wallpaperRepo.wallpaperBitmap
+    val wallpaperScaleMode: StateFlow<DesktopWallpaperRepository.ScaleMode> = wallpaperRepo.scaleMode
+    val hasCustomWallpaper: StateFlow<Boolean> = wallpaperRepo.hasCustomWallpaper
 
     private var lastDismissTime = 0L
 
@@ -141,6 +153,27 @@ class PcModeLauncherViewModel @Inject constructor() : ViewModel() {
         _showMediaPlayer.value = false
         _showTasksOverview.value = false
     }
+
+    fun showWallpaperSettings() {
+        _showWallpaperSettings.value = true
+    }
+
+    fun closeWallpaperSettings() {
+        _showWallpaperSettings.value = false
+    }
+
+    fun closeWallpaperSettingsIfOpen(): Boolean {
+        if (!_showWallpaperSettings.value) return false
+        closeWallpaperSettings()
+        return true
+    }
+
+    fun selectWallpaper(uri: Uri) = wallpaperRepo.setWallpaper(uri)
+
+    fun removeCustomWallpaper() = wallpaperRepo.removeWallpaper()
+
+    fun setWallpaperScaleMode(mode: DesktopWallpaperRepository.ScaleMode) =
+        wallpaperRepo.setScaleMode(mode)
 
     fun isAnyPanelShowing(): Boolean {
         return _showStartMenu.value ||

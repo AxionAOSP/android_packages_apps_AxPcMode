@@ -16,44 +16,36 @@
 
 package com.android.axion.axpcmode.ui.components
 
-import android.app.WallpaperManager
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.graphics.drawable.toBitmap
+import androidx.compose.ui.res.stringResource
+import com.android.axion.axpcmode.R
 
 @Composable
-fun DesktopWallpaper() {
-    val context = LocalContext.current
-    var wallpaperBitmap by remember { mutableStateOf<Bitmap?>(null) }
-
-    LaunchedEffect(Unit) {
-        val wallpaperManager = WallpaperManager.getInstance(context)
-        val drawable = wallpaperManager.drawable
-        if (drawable != null) {
-            wallpaperBitmap = drawable.toBitmap()
-        }
-    }
-
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+fun DesktopWallpaper(
+    wallpaperBitmap: Bitmap?,
+    contentScale: ContentScale,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+    ) {
         if (wallpaperBitmap != null) {
             Image(
-                bitmap = wallpaperBitmap!!.asImageBitmap(),
-                contentDescription = "Desktop Wallpaper",
-                contentScale = ContentScale.Crop,
+                bitmap = wallpaperBitmap.asImageBitmap(),
+                contentDescription = stringResource(R.string.desktop_wallpaper_desc),
+                contentScale = contentScale,
                 modifier = Modifier.fillMaxSize(),
             )
-        } else {
-
-            Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F23)))
         }
     }
 }
