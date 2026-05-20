@@ -32,7 +32,7 @@
     <string name="edit_tiles">編輯快捷按鈕</string>
     <string name="calendar_today">今天</string>
     <string name="calendar_no_events">沒有活動</string>
-    <string name="wallpaper_settings_title">Wallpaper Settings</string>
+    <string name="wallpaper_settings_title">桌布設定</string>
     <string name="select_wallpaper">Select Wallpaper</string>
     <string name="remove_custom_wallpaper">Remove Custom Wallpaper</string>
     <string name="wallpaper_preview_title">預覽</string>
@@ -48,7 +48,7 @@
     <string name="wallpaper_scale_stretch_summary">Fill the desktop without cropping</string>
     <string name="wallpaper_scale_center">置中</string>
     <string name="wallpaper_scale_center_summary">Keep the image at its original size</string>
-    <string name="back_to_desktop">Back to Desktop</string>
-    <string name="wallpaper_preview_desc">Wallpaper Preview</string>
-    <string name="action_wallpaper_settings">Wallpaper Settings</string>
+    <string name="back_to_desktop">返回桌面</string>
+    <string name="wallpaper_preview_desc">桌布預覽</string>
+    <string name="action_wallpaper_settings">桌布設定</string>
 </resources>
