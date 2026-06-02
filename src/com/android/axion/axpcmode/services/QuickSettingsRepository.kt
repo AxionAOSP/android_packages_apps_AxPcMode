@@ -23,18 +23,16 @@ import android.content.IntentFilter
 import android.hardware.display.BrightnessInfo
 import android.hardware.display.DisplayManager
 import android.media.AudioManager
-import android.os.Bundle
 import android.provider.Settings
 import com.android.axion.compose.preferences.SettingsFlow
 import com.android.axion.compose.preferences.SettingsType
-import com.android.axion.platform.AxPlatformClient
+import com.android.axion.platform.AxFeatureState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -95,9 +93,6 @@ class QuickSettingsRepository(
     private val _availableTiles = MutableStateFlow<List<AvailableTileData>>(emptyList())
     val availableTiles = _availableTiles.asStateFlow()
 
-    val btState: Flow<Bundle> = platformRepo.stateFlow(AxPlatformClient.FEATURE_BLUETOOTH)
-    val wifiScanState: Flow<Bundle> = platformRepo.stateFlow(AxPlatformClient.KEY_WIFI_SCAN)
-
     private var savedSpecs = platformRepo.getSavedTileSpecs()
     private val tileCollectorJobs = mutableListOf<Job>()
 
@@ -133,11 +128,11 @@ class QuickSettingsRepository(
     private fun refreshTilesFromState() {
         val previous = _qsTiles.value.associateBy { it.spec }
         _qsTiles.value = savedSpecs.map { spec ->
-            val bundle = platformRepo.getState(spec)
-            if (bundle.isEmpty) {
-                previous[spec] ?: bundleToTileData(spec, bundle)
+            val state = platformRepo.getState(spec)
+            if (state.isEmpty) {
+                previous[spec] ?: stateToTileData(spec, state)
             } else {
-                bundleToTileData(spec, bundle)
+                stateToTileData(spec, state)
             }
         }
     }
@@ -153,10 +148,10 @@ class QuickSettingsRepository(
         _availableTiles.value = supported
             .filter { it !in activeSpecs }
             .map { spec ->
-                val bundle = platformRepo.getState(spec)
+                val state = platformRepo.getState(spec)
                 AvailableTileData(
                     spec = spec,
-                    label = AxPlatformClient.getLabel(bundle) ?: spec,
+                    label = state.label ?: spec,
                 )
             }
     }
@@ -213,12 +208,12 @@ class QuickSettingsRepository(
     }
 
     companion object {
-        private fun bundleToTileData(spec: String, bundle: Bundle): QSTileData =
+        private fun stateToTileData(spec: String, state: AxFeatureState): QSTileData =
             QSTileData(
                 spec = spec,
-                label = AxPlatformClient.getLabel(bundle) ?: spec,
-                secondaryLabel = AxPlatformClient.getSecondaryLabel(bundle) ?: "",
-                state = AxPlatformClient.getTileState(bundle),
+                label = state.label ?: spec,
+                secondaryLabel = state.secondaryLabel ?: "",
+                state = state.tileState,
                 isTransient = false,
             )
     }

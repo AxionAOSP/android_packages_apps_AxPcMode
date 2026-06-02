@@ -32,7 +32,6 @@ class QuickSettingsViewModel @Inject constructor(
     val isAutoBrightness = repository.isAutoBrightness
     val volume = repository.volume
     val maxVolume = repository.maxVolume
-    val wifiScanState = repository.wifiScanState
 
     val qsTiles = repository.qsTiles
 
