@@ -3,13 +3,13 @@
     <string name="app_name">AxPcMode</string>
     <string name="settings">Налаштування</string>
     <!-- Settings -->
-    <string name="pc_mode_title">PC Mode</string>
+    <string name="pc_mode_title">Режим ПК</string>
     <string name="pref_category_general">Загальні</string>
     <string name="pref_category_taskbar">Панель завдань</string>
     <string name="pref_enable_pc_mode_title">Увімкнути режим ПК</string>
     <string name="pref_enable_pc_mode_summary">Transform your device into a desktop-like experience</string>
-    <string name="pref_taskbar_timeout_title">Auto-hide timeout</string>
-    <string name="pref_taskbar_timeout_summary">Duration before taskbar hides automatically</string>
+    <string name="pref_taskbar_timeout_title">Затримка автоприховування</string>
+    <string name="pref_taskbar_timeout_summary">Час очікування перед автоприховуванням панелі завдань</string>
     <string name="back_button_desc">Назад</string>
     <!-- Context Menus -->
     <string name="action_floating_window">Floating Window</string>
