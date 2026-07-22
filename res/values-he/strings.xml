@@ -3,17 +3,17 @@
     <string name="app_name">AxPcMode</string>
     <string name="settings">הגדרות</string>
     <!-- Settings -->
-    <string name="pc_mode_title">PC Mode</string>
+    <string name="pc_mode_title">מצב מחשב שולחני</string>
     <string name="pref_category_general">כללי</string>
-    <string name="pref_category_taskbar">Taskbar</string>
-    <string name="pref_enable_pc_mode_title">Enable PC Mode</string>
+    <string name="pref_category_taskbar">שורת משימות</string>
+    <string name="pref_enable_pc_mode_title">הפעלת מצב מחשב שולחני</string>
     <string name="pref_enable_pc_mode_summary">Transform your device into a desktop-like experience</string>
     <string name="pref_taskbar_timeout_title">Auto-hide timeout</string>
     <string name="pref_taskbar_timeout_summary">Duration before taskbar hides automatically</string>
     <string name="back_button_desc">חזרה</string>
     <!-- Context Menus -->
     <string name="action_floating_window">חלון צף</string>
-    <string name="action_close_app">Close</string>
+    <string name="action_close_app">סגירה</string>
     <string name="action_pin_to_taskbar">הצמדה לשורת המשימות</string>
     <string name="action_unpin_from_taskbar">ביטול הצמדה לשורת המשימות</string>
     <string name="action_add_to_desktop">הוספה לשולחן העבודה</string>
@@ -23,8 +23,8 @@
     <string name="task_overview_no_active_tasks">אין משימות פעילות</string>
     <string name="task_overview_clear_all">ניקוי כל המשימות</string>
     <string name="task_overview_close_task_format">סגירת %1$s</string>
-    <string name="desktop_wallpaper_desc">Desktop Wallpaper</string>
-    <string name="search_apps_hint">Search apps...</string>
+    <string name="desktop_wallpaper_desc">טפס לשולחן העבודה</string>
+    <string name="search_apps_hint">חיפוש אפליקציות...</string>
     <string name="active_tiles">Active Tiles (Drag to reorder/remove)</string>
     <string name="available_tiles">Available Tiles (Drag/Tap to add)</string>
     <string name="drag_tiles_here">Drag tiles here</string>
@@ -32,4 +32,23 @@
     <string name="edit_tiles">Edit Tiles</string>
     <string name="calendar_today">היום</string>
     <string name="calendar_no_events">אין אירועים</string>
+    <string name="wallpaper_settings_title">הגדרות טפט</string>
+    <string name="select_wallpaper">בחירת טפט</string>
+    <string name="remove_custom_wallpaper">הסרת טפט מותאם אישית</string>
+    <string name="wallpaper_preview_title">Preview</string>
+    <string name="wallpaper_preview_summary">Desktop-only wallpaper shown behind apps and the taskbar</string>
+    <string name="wallpaper_actions_title">תמונת רקע</string>
+    <string name="wallpaper_scaling_title">קנה מידה</string>
+    <string name="wallpaper_scaling_summary">Choose how the image is fitted to the desktop</string>
+    <string name="wallpaper_scale_fill">Fill</string>
+    <string name="wallpaper_scale_fill_summary">Crop edges to cover the whole desktop</string>
+    <string name="wallpaper_scale_fit">Fit</string>
+    <string name="wallpaper_scale_fit_summary">Show the full image with empty space if needed</string>
+    <string name="wallpaper_scale_stretch">מתיחה</string>
+    <string name="wallpaper_scale_stretch_summary">Fill the desktop without cropping</string>
+    <string name="wallpaper_scale_center">Center</string>
+    <string name="wallpaper_scale_center_summary">Keep the image at its original size</string>
+    <string name="back_to_desktop">Back to Desktop</string>
+    <string name="wallpaper_preview_desc">Wallpaper Preview</string>
+    <string name="action_wallpaper_settings">הגדרות טפט</string>
 </resources>

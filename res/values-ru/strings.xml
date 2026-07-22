@@ -32,4 +32,23 @@
     <string name="edit_tiles">Редактировать плитку</string>
     <string name="calendar_today">Сегодня</string>
     <string name="calendar_no_events">Нет событий</string>
+    <string name="wallpaper_settings_title">Wallpaper Settings</string>
+    <string name="select_wallpaper">Select Wallpaper</string>
+    <string name="remove_custom_wallpaper">Remove Custom Wallpaper</string>
+    <string name="wallpaper_preview_title">Preview</string>
+    <string name="wallpaper_preview_summary">Desktop-only wallpaper shown behind apps and the taskbar</string>
+    <string name="wallpaper_actions_title">Обои</string>
+    <string name="wallpaper_scaling_title">Scaling</string>
+    <string name="wallpaper_scaling_summary">Choose how the image is fitted to the desktop</string>
+    <string name="wallpaper_scale_fill">Fill</string>
+    <string name="wallpaper_scale_fill_summary">Crop edges to cover the whole desktop</string>
+    <string name="wallpaper_scale_fit">Fit</string>
+    <string name="wallpaper_scale_fit_summary">Show the full image with empty space if needed</string>
+    <string name="wallpaper_scale_stretch">Stretch</string>
+    <string name="wallpaper_scale_stretch_summary">Fill the desktop without cropping</string>
+    <string name="wallpaper_scale_center">Center</string>
+    <string name="wallpaper_scale_center_summary">Keep the image at its original size</string>
+    <string name="back_to_desktop">Back to Desktop</string>
+    <string name="wallpaper_preview_desc">Wallpaper Preview</string>
+    <string name="action_wallpaper_settings">Wallpaper Settings</string>
 </resources>
