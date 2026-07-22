@@ -47,8 +47,8 @@
     <string name="wallpaper_scale_stretch">Розтягнути</string>
     <string name="wallpaper_scale_stretch_summary">Заповнити стільницю без обрізання</string>
     <string name="wallpaper_scale_center">Center</string>
-    <string name="wallpaper_scale_center_summary">Keep the image at its original size</string>
-    <string name="back_to_desktop">Back to Desktop</string>
-    <string name="wallpaper_preview_desc">Wallpaper Preview</string>
+    <string name="wallpaper_scale_center_summary">Зберегти зображення в оригінальному розмірі</string>
+    <string name="back_to_desktop">Назад до стільниці</string>
+    <string name="wallpaper_preview_desc">Передперегляд шпалер</string>
     <string name="action_wallpaper_settings">Налаштування шпалер</string>
 </resources>
