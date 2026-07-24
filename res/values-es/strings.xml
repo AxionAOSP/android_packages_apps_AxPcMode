@@ -14,7 +14,7 @@
     <!-- Context Menus -->
     <string name="action_floating_window">Floating Window</string>
     <string name="action_close_app">Cerrar</string>
-    <string name="action_pin_to_taskbar">Pin to Taskbar</string>
+    <string name="action_pin_to_taskbar">Anclar a la barra de tareas</string>
     <string name="action_unpin_from_taskbar">Unpin from Taskbar</string>
     <string name="action_add_to_desktop">Add to Desktop</string>
     <string name="action_remove_from_desktop">Remove from Desktop</string>
