@@ -41,14 +41,14 @@
     <string name="wallpaper_scaling_title">Escala</string>
     <string name="wallpaper_scaling_summary">Elija cómo se ajusta la imagen al escritorio</string>
     <string name="wallpaper_scale_fill">Rellenar</string>
-    <string name="wallpaper_scale_fill_summary">Crop edges to cover the whole desktop</string>
+    <string name="wallpaper_scale_fill_summary">Recortar bordes para cubrir todo el escritorio</string>
     <string name="wallpaper_scale_fit">Ajustar</string>
-    <string name="wallpaper_scale_fit_summary">Show the full image with empty space if needed</string>
-    <string name="wallpaper_scale_stretch">Stretch</string>
-    <string name="wallpaper_scale_stretch_summary">Fill the desktop without cropping</string>
-    <string name="wallpaper_scale_center">Center</string>
-    <string name="wallpaper_scale_center_summary">Keep the image at its original size</string>
-    <string name="back_to_desktop">Back to Desktop</string>
-    <string name="wallpaper_preview_desc">Wallpaper Preview</string>
+    <string name="wallpaper_scale_fit_summary">Mostrar la imagen completa con espacio vacío si es necesario</string>
+    <string name="wallpaper_scale_stretch">Estirar</string>
+    <string name="wallpaper_scale_stretch_summary">Rellena el escritorio sin recortar</string>
+    <string name="wallpaper_scale_center">Centro</string>
+    <string name="wallpaper_scale_center_summary">Mantener la imagen en su tamaño original</string>
+    <string name="back_to_desktop">Volver al escritorio</string>
+    <string name="wallpaper_preview_desc">Vista previa del fondo de pantalla</string>
     <string name="action_wallpaper_settings">Configuración de Fondo de pantalla</string>
 </resources>
