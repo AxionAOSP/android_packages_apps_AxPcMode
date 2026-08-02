@@ -36,14 +36,14 @@
     <string name="select_wallpaper">Select Wallpaper</string>
     <string name="remove_custom_wallpaper">Remove Custom Wallpaper</string>
     <string name="wallpaper_preview_title">Preview</string>
-    <string name="wallpaper_preview_summary">Desktop-only wallpaper shown behind apps and the taskbar</string>
+    <string name="wallpaper_preview_summary">仅作为桌面背景，位于应用窗口和任务栏的下层</string>
     <string name="wallpaper_actions_title">壁纸</string>
     <string name="wallpaper_scaling_title">Scaling</string>
     <string name="wallpaper_scaling_summary">Choose how the image is fitted to the desktop</string>
     <string name="wallpaper_scale_fill">Fill</string>
     <string name="wallpaper_scale_fill_summary">Crop edges to cover the whole desktop</string>
     <string name="wallpaper_scale_fit">Fit</string>
-    <string name="wallpaper_scale_fit_summary">Show the full image with empty space if needed</string>
+    <string name="wallpaper_scale_fit_summary">完整显示图片，其余部分留空</string>
     <string name="wallpaper_scale_stretch">Stretch</string>
     <string name="wallpaper_scale_stretch_summary">Fill the desktop without cropping</string>
     <string name="wallpaper_scale_center">居中</string>
