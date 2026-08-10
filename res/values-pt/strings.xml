@@ -9,7 +9,7 @@
     <string name="pref_enable_pc_mode_title">Enable PC Mode</string>
     <string name="pref_enable_pc_mode_summary">Transform your device into a desktop-like experience</string>
     <string name="pref_taskbar_timeout_title">Auto-hide timeout</string>
-    <string name="pref_taskbar_timeout_summary">Duration before taskbar hides automatically</string>
+    <string name="pref_taskbar_timeout_summary">Duração antes da barra de tarefas se esconder automaticamente</string>
     <string name="back_button_desc">Voltar</string>
     <!-- Context Menus -->
     <string name="action_floating_window">Floating Window</string>
