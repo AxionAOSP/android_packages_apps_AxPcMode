@@ -27,8 +27,8 @@
     <string name="search_apps_hint">Pesquisar aplicativos...</string>
     <string name="active_tiles">Active Tiles (Drag to reorder/remove)</string>
     <string name="available_tiles">Available Tiles (Drag/Tap to add)</string>
-    <string name="drag_tiles_here">Drag tiles here</string>
-    <string name="all_tiles_added">All tiles added</string>
+    <string name="drag_tiles_here">Arraste os blocos aqui</string>
+    <string name="all_tiles_added">Todos os blocos adicionados</string>
     <string name="edit_tiles">Editar botões</string>
     <string name="calendar_today">Today</string>
     <string name="calendar_no_events">No events</string>
