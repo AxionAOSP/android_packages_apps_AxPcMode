@@ -49,6 +49,6 @@
     <string name="wallpaper_scale_center">По центру</string>
     <string name="wallpaper_scale_center_summary">Зберегти зображення в оригінальному розмірі</string>
     <string name="back_to_desktop">Повернутися до робочого стола</string>
-    <string name="wallpaper_preview_desc">Передперегляд шпалер</string>
+    <string name="wallpaper_preview_desc">Попередній перегляд шпалер</string>
     <string name="action_wallpaper_settings">Налаштування шпалер</string>
 </resources>
