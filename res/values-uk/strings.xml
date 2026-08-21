@@ -40,9 +40,9 @@
     <string name="wallpaper_actions_title">Шпалери</string>
     <string name="wallpaper_scaling_title">Масштабування</string>
     <string name="wallpaper_scaling_summary">Виберіть спосіб розміщення зображення на стільниці</string>
-    <string name="wallpaper_scale_fill">На весь екран</string>
+    <string name="wallpaper_scale_fill">Заповнити</string>
     <string name="wallpaper_scale_fill_summary">Обрізати краї, щоб заповнити весь робочий стіл</string>
-    <string name="wallpaper_scale_fit">За розміром</string>
+    <string name="wallpaper_scale_fit">Вписати</string>
     <string name="wallpaper_scale_fit_summary">Показувати зображення повністю, за потреби з порожнім простором</string>
     <string name="wallpaper_scale_stretch">Розтягнути</string>
     <string name="wallpaper_scale_stretch_summary">Заповнити стільницю без обрізання</string>
