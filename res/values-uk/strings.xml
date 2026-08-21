@@ -7,23 +7,23 @@
     <string name="pref_category_general">Загальні</string>
     <string name="pref_category_taskbar">Панель завдань</string>
     <string name="pref_enable_pc_mode_title">Увімкнути режим ПК</string>
-    <string name="pref_enable_pc_mode_summary">Зробіть свій пристрій максимально схожим на комп’ютер</string>
+    <string name="pref_enable_pc_mode_summary">Перетворіть свій пристрій на повноцінний робочий стіл</string>
     <string name="pref_taskbar_timeout_title">Затримка автоприховування</string>
     <string name="pref_taskbar_timeout_summary">Час очікування перед автоприховуванням панелі завдань</string>
     <string name="back_button_desc">Назад</string>
     <!-- Context Menus -->
-    <string name="action_floating_window">Плавуче вікно</string>
+    <string name="action_floating_window">Плаваюче вікно</string>
     <string name="action_close_app">Закрити</string>
     <string name="action_pin_to_taskbar">Закріпити на панелі завдань</string>
     <string name="action_unpin_from_taskbar">Відкріпити від панелі завдань</string>
-    <string name="action_add_to_desktop">Додати на стільницю</string>
-    <string name="action_remove_from_desktop">Видалити зі стільниці</string>
+    <string name="action_add_to_desktop">Додати на робочий стіл</string>
+    <string name="action_remove_from_desktop">Видалити з робочого стола</string>
     <string name="action_app_info">Про застосунок</string>
     <!-- Panels & UI -->
     <string name="task_overview_no_active_tasks">Немає активних завдань</string>
     <string name="task_overview_clear_all">Очистити всі завдання</string>
     <string name="task_overview_close_task_format">Закрити %1$s</string>
-    <string name="desktop_wallpaper_desc">Шпалери стільниці</string>
+    <string name="desktop_wallpaper_desc">Шпалери робочого стола</string>
     <string name="search_apps_hint">Пошук додатків…</string>
     <string name="active_tiles">Активні плитки (Перетягніть, щоб змінити порядок або видалити)</string>
     <string name="available_tiles">Доступні плитки (перетягніть або торкніться, аби додати)</string>
@@ -36,19 +36,19 @@
     <string name="select_wallpaper">Вибрати шпалери</string>
     <string name="remove_custom_wallpaper">Видалити користувацькі шпалери</string>
     <string name="wallpaper_preview_title">Попередній перегляд</string>
-    <string name="wallpaper_preview_summary">Шпалери лише для стільниці, що показуються за застосунками та панеллю завдань</string>
+    <string name="wallpaper_preview_summary">Шпалери робочого стола, що показуються за вікнами застосунків та панеллю задач</string>
     <string name="wallpaper_actions_title">Шпалери</string>
     <string name="wallpaper_scaling_title">Масштабування</string>
     <string name="wallpaper_scaling_summary">Виберіть спосіб розміщення зображення на стільниці</string>
     <string name="wallpaper_scale_fill">На весь екран</string>
-    <string name="wallpaper_scale_fill_summary">Обрізати краї, щоби заповнити всю стільницю</string>
+    <string name="wallpaper_scale_fill_summary">Обрізати краї, щоб заповнити весь робочий стіл</string>
     <string name="wallpaper_scale_fit">За розміром</string>
-    <string name="wallpaper_scale_fit_summary">Показувати зображення повністю, за потреби з пустим місцем</string>
+    <string name="wallpaper_scale_fit_summary">Показувати зображення повністю, за потреби з порожнім простором</string>
     <string name="wallpaper_scale_stretch">Розтягнути</string>
     <string name="wallpaper_scale_stretch_summary">Заповнити стільницю без обрізання</string>
     <string name="wallpaper_scale_center">По центру</string>
     <string name="wallpaper_scale_center_summary">Зберегти зображення в оригінальному розмірі</string>
-    <string name="back_to_desktop">Назад до стільниці</string>
+    <string name="back_to_desktop">Повернутися до робочого стола</string>
     <string name="wallpaper_preview_desc">Передперегляд шпалер</string>
     <string name="action_wallpaper_settings">Налаштування шпалер</string>
 </resources>
