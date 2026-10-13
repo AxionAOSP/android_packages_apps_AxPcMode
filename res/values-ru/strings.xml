@@ -40,9 +40,9 @@
     <string name="wallpaper_actions_title">Обои</string>
     <string name="wallpaper_scaling_title">Масштаб</string>
     <string name="wallpaper_scaling_summary">Выберите способ установки изображения на рабочем столе</string>
-    <string name="wallpaper_scale_fill">Fill</string>
+    <string name="wallpaper_scale_fill">Заполнить</string>
     <string name="wallpaper_scale_fill_summary">Обрезать края, чтобы покрыть весь рабочий стол</string>
-    <string name="wallpaper_scale_fit">Fit</string>
+    <string name="wallpaper_scale_fit">Подогнать</string>
     <string name="wallpaper_scale_fit_summary">Показывать полное изображение с пустым пространством, если необходимо</string>
     <string name="wallpaper_scale_stretch">Растянуть</string>
     <string name="wallpaper_scale_stretch_summary">Заполнить рабочий стол без кадрирования</string>
