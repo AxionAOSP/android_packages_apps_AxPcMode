@@ -35,7 +35,7 @@
     <string name="wallpaper_settings_title">Настройки отображения</string>
     <string name="select_wallpaper">Выбрать обои</string>
     <string name="remove_custom_wallpaper">Удалить пользовательские обои</string>
-    <string name="wallpaper_preview_title">Preview</string>
+    <string name="wallpaper_preview_title">Предпросмотр</string>
     <string name="wallpaper_preview_summary">Обои только для рабочего стола, показанные за приложениями и панелью задач</string>
     <string name="wallpaper_actions_title">Обои</string>
     <string name="wallpaper_scaling_title">Масштаб</string>
@@ -46,7 +46,7 @@
     <string name="wallpaper_scale_fit_summary">Показывать полное изображение с пустым пространством, если необходимо</string>
     <string name="wallpaper_scale_stretch">Растянуть</string>
     <string name="wallpaper_scale_stretch_summary">Заполнить рабочий стол без кадрирования</string>
-    <string name="wallpaper_scale_center">Center</string>
+    <string name="wallpaper_scale_center">Центр</string>
     <string name="wallpaper_scale_center_summary">Сохранить изображение в исходном размере</string>
     <string name="back_to_desktop">Вернуться на рабочий стол</string>
     <string name="wallpaper_preview_desc">Предпросмотр обоев</string>
